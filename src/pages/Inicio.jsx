@@ -1,4 +1,5 @@
-import "react-responsive-carousel/lib/styles/carousel.min.css";
+import React, { useState, useEffect } from "react";
+import * as signalR from "@microsoft/signalr";
 import { Carousel } from "react-responsive-carousel";
 import Tracking from "../components/Tracking";
 import Accesos from "../components/Accesos";
@@ -13,9 +14,111 @@ const Inicio = () => {
   const [isOpenModal1, openModal1, closeModal1] = useModal(false);
   const isMobile = window.innerWidth <= 768;
 
-  const { data, loading, error } = useFetch(
-    `http://190.113.124.155:9090/api/BannerPrincipal`
+  const { data, loading, error, setData } = useFetch(
+    `https://localhost:7072/api/BannerPrincipal`
   );
+
+  /*const { data, loading, error, setData } = useFetch(
+    `https://apiadmin.tranquiexpress.com/api/BannerPrincipal`
+  );*/
+
+  const [signalRData, setSignalRData] = useState(null);
+
+  useEffect(() => {
+    if (data) {
+      setSignalRData(data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("https://localhost:7072/hub", {
+        withCredentials: true,
+      })
+      .build();
+
+    /*const connection = new signalR.HubConnectionBuilder()
+        .withUrl("https://apiadmin.tranquiexpress.com/hub", {
+          withCredentials: true,
+        })
+        .build();*/
+
+    connection.on("BannerRegistrado", (banner) => {
+      setSignalRData((prevData) => {
+        if (!prevData || !prevData.data || !prevData.data.items) {
+          return { data: { items: [banner] } };
+        }
+
+        const updatedItems = [...prevData.data.items, banner];
+
+        const updatedData = {
+          ...prevData,
+          data: {
+            ...prevData.data,
+            items: updatedItems,
+          },
+        };
+
+        return updatedData;
+      });
+    });
+
+    connection.on("BannerActualizado", (banner) => {
+      setSignalRData((prevData) => {
+        if (!prevData || !prevData.data) {
+          return { data: { items: [] } };
+        }
+
+        const updatedItems = prevData.data.items.map((item) =>
+          item.id === banner.id ? banner : item
+        );
+
+        const updatedData = {
+          ...prevData,
+          data: {
+            ...prevData.data,
+            items: updatedItems,
+          },
+        };
+
+        return updatedData;
+      });
+    });
+
+    connection.on("BannerEliminado", (id) => {
+      setSignalRData((prevData) => {
+        if (!prevData || !prevData.data) {
+          return { data: { items: [] } };
+        }
+
+        const filteredItems = prevData.data.items.filter(
+          (item) => item.id !== id
+        );
+
+        const updatedData = {
+          ...prevData,
+          data: {
+            items: filteredItems,
+          },
+        };
+
+        return updatedData;
+      });
+    });
+
+    connection
+      .start()
+      .then(() => {
+        console.log("Conexión establecida con éxito");
+      })
+      .catch((error) => {
+        console.error("Error al iniciar la conexión:", error);
+      });
+
+    return () => {
+      connection.stop();
+    };
+  }, []);
 
   return (
     <section id="home" className="relative">
@@ -31,9 +134,10 @@ const Inicio = () => {
         emulateTouch={true}
         dynamicHeight={false}
       >
-        {data &&
-          data.data.items &&
-          data.data.items
+        {signalRData &&
+          signalRData.data &&
+          signalRData.data.items &&
+          signalRData.data.items
             .filter((item) => item.estado === 1)
             .map((item) => (
               <div key={item.id}>
@@ -45,6 +149,7 @@ const Inicio = () => {
               </div>
             ))}
       </Carousel>
+
       <div
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center pt-20"
         style={{ zIndex: 20 }}
@@ -56,42 +161,17 @@ const Inicio = () => {
           modal1={() => openModal1()}
         />
       </div>
+
       <div className="md:hidden mt-[250px] text-center">
-        {<Accesos modal={() => openModal()} modal1={() => openModal1()} />}
+        <Accesos modal={() => openModal()} modal1={() => openModal1()} />
       </div>
+
       <Modal2 isOpen={isOpenModal} closeModal={closeModal}>
-        {/* <ProgramarRecoleccionForm closeModal={() => closeModal()} /> */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-          }}
-        >
-          <img
-            src="programar_recoleccion.png"
-            alt="Imagen"
-            style={{ maxWidth: "100%", maxHeight: "100%" }}
-          />
-        </div>
+        <ProgramarRecoleccionForm closeModal={() => closeModal()} />
       </Modal2>
+
       <Modal2 isOpen={isOpenModal1} closeModal={closeModal1}>
-        {/* <Tarifas1 /> */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-          }}
-        >
-          <img
-            src="tarifas_rutas.png"
-            alt="Imagen"
-            style={{ maxWidth: "100%", maxHeight: "100%" }}
-          />
-        </div>
+        <Tarifas1 />
       </Modal2>
     </section>
   );

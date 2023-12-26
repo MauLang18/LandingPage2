@@ -1,11 +1,21 @@
 import React from "react";
 import "./style.css";
 import CustomCard from "../components/CustomCard";
-import { useFetchId } from "../hooks/useFetchId";
+import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
 
 const Mas = () => {
-  const TUTORIAL = useFetchId(10)?.data?.valor || "";
-  const REGISTRO = useFetchId(14)?.data?.valor || "";
+  const TUTORIAL = useFetchIdAndUpdateSignalR(10) || {};
+  const REGISTRO = useFetchIdAndUpdateSignalR(14) || {};
+
+  const extractValue = (data) => {
+    if (data && data.data && data.data.valor) {
+      return data.data.valor;
+    } else if (data && data.valor) {
+      return data.valor;
+    } else {
+      return "";
+    }
+  };
 
   return (
     <div className="lg:w-[950px] lg:h-[548px] w-full relative mx-auto">
@@ -20,14 +30,14 @@ const Mas = () => {
           img={true}
           imageSrc={"sos-nuevo.png"}
           buttonText={"Ver tutorial"}
-          buttonLink={TUTORIAL}
+          buttonLink={extractValue(TUTORIAL)}
           title="¿Sos nuevo en Tranqui Express?"
         />
         <CustomCard
           img={true}
           imageSrc={"cuenta.png"}
           buttonText={"Registrarse"}
-          buttonLink={REGISTRO}
+          buttonLink={extractValue(REGISTRO)}
           title="¿Aún no tenés una cuenta?"
         />
       </div>

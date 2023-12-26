@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { RiCloseLine, RiMenu3Fill } from "react-icons/ri";
 import "./style.css";
-import { useFetchId } from "../hooks/useFetchId";
+import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
 
 const NavBar = () => {
   const [navbarFixed, setNavbarFixed] = useState(false);
@@ -46,9 +46,19 @@ const NavBar = () => {
     ? "top-0 xl:static flex-1 flex flex-col xl:flex-row items-center justify-center gap-10 transition-all duration-500 z-50"
     : "hidden";
 
-  const ENVIO = useFetchId(11)?.data?.valor || "";
-  const RASTREO = useFetchId(12)?.data?.valor || "";
-  const LOGIN = useFetchId(15)?.data?.valor || "";
+  const ENVIO = useFetchIdAndUpdateSignalR(11) || {};
+  const RASTREO = useFetchIdAndUpdateSignalR(12) || {};
+  const LOGIN = useFetchIdAndUpdateSignalR(15) || {};
+
+  const extractValue = (data) => {
+    if (data && data.data && data.data.valor) {
+      return data.data.valor;
+    } else if (data && data.valor) {
+      return data.valor;
+    } else {
+      return "";
+    }
+  };
 
   return (
     <>
@@ -63,7 +73,7 @@ const NavBar = () => {
         <div className="flex items-center justify-between w-full p-4">
           <button
             className="w-[50px] h-[50px] flex items-center justify-center text-center"
-            onClick={() => handleAlert(LOGIN)}
+            onClick={() => handleAlert(extractValue(LOGIN))}
           >
             <img src="on-off.png" alt="Icono" className="w-6 h-6" />
           </button>
@@ -107,7 +117,7 @@ const NavBar = () => {
               Contáctenos
             </a>
             <a
-              href={ENVIO}
+              href={extractValue(ENVIO)}
               target="_blank"
               className={`${selectedOption === "envio" ? "underline" : ""}`}
               style={{ fontFamily: "'fuente', sans-serif" }}
@@ -115,7 +125,7 @@ const NavBar = () => {
               Envío
             </a>
             <a
-              href={RASTREO}
+              href={extractValue(RASTREO)}
               target="_blank"
               className={`${selectedOption === "rastreo" ? "underline" : ""}`}
               style={{ fontFamily: "'fuente', sans-serif" }}
@@ -175,7 +185,7 @@ const NavBar = () => {
             Contáctenos
           </a>
           <a
-            href={ENVIO}
+            href={extractValue(ENVIO)}
             target="_blank"
             className={`${
               selectedOption === "envio" ? "underline" : ""
@@ -185,7 +195,7 @@ const NavBar = () => {
             Envío
           </a>
           <a
-            href={RASTREO}
+            href={extractValue(RASTREO)}
             target="_blank"
             className={`${
               selectedOption === "rastreo" ? "underline" : ""
@@ -208,14 +218,14 @@ const NavBar = () => {
           className="w-[350px] h-[54px] flex items-center justify-center text-center text-white text-lg font-medium my-auto lg:mr-[-20px] mr-[0px]"
           style={{ fontFamily: "'fuente', sans-serif" }}
         >
-          <button className="" onClick={() => handleAlert(LOGIN)}>
+          <button className="" onClick={() => handleAlert(extractValue(LOGIN))}>
             Registrarse / Iniciar sesión
           </button>
         </div>
         <div className="xl:flex xl:items-center xl:justify-center lg:mr-[70px] my-auto">
           <button
             className="w-[50px] h-[50px] flex items-center justify-center text-center"
-            onClick={() => handleAlert(LOGIN)}
+            onClick={() => handleAlert(extractValue(LOGIN))}
           >
             <img src="on-off.png" alt="Icono" className="w-6 h-6" />
           </button>

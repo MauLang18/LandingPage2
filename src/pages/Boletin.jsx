@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import * as signalR from "@microsoft/signalr";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-import { Carousel } from "react-responsive-carousel";
 import "./style.css";
 import Modal from "../components/Modal";
 import { useModal } from "../hooks/useModal";
@@ -10,12 +10,117 @@ import { useFetch } from "../hooks/useFetch";
 const Boletin = () => {
   const [isOpenModal1, openModal1, closeModal1] = useModal(false);
 
-  const { data, loading, error } = useFetch(
-    `http://190.113.124.155:9090/api/Boletin`
+  const { data, loading, error, setData } = useFetch(
+    `https://localhost:7072/api/Boletin`
   );
 
+  /*const { data, loading, error } = useFetch(
+    `https://apiadmin.tranquiexpress.com/api/Boletin`
+  );*/
+
+  const [signalRData, setSignalRData] = useState(null);
+
+  useEffect(() => {
+    if (data) {
+      setSignalRData(data);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("https://localhost:7072/hub", {
+        withCredentials: true,
+      })
+      .build();
+
+    /*const connection = new signalR.HubConnectionBuilder()
+        .withUrl("https://apiadmin.tranquiexpress.com/hub", {
+          withCredentials: true,
+        })
+        .build();*/
+
+    connection.on("BoletinRegistrado", (banner) => {
+      setSignalRData((prevData) => {
+        if (!prevData || !prevData.data || !prevData.data.items) {
+          return { data: { items: [banner] } };
+        }
+
+        const updatedItems = [...prevData.data.items, banner];
+
+        const updatedData = {
+          ...prevData,
+          data: {
+            ...prevData.data,
+            items: updatedItems,
+          },
+        };
+
+        return updatedData;
+      });
+    });
+
+    connection.on("BoletinActualizado", (banner) => {
+      setSignalRData((prevData) => {
+        if (!prevData || !prevData.data) {
+          return { data: { items: [] } };
+        }
+
+        const updatedItems = prevData.data.items.map((item) =>
+          item.id === banner.id ? banner : item
+        );
+
+        const updatedData = {
+          ...prevData,
+          data: {
+            ...prevData.data,
+            items: updatedItems,
+          },
+        };
+
+        return updatedData;
+      });
+    });
+
+    connection.on("BoletinEliminado", (id) => {
+      setSignalRData((prevData) => {
+        if (!prevData || !prevData.data) {
+          return { data: { items: [] } };
+        }
+
+        const filteredItems = prevData.data.items.filter(
+          (item) => item.id !== id
+        );
+
+        const updatedData = {
+          ...prevData,
+          data: {
+            items: filteredItems,
+          },
+        };
+
+        return updatedData;
+      });
+    });
+
+    connection
+      .start()
+      .then(() => {
+        console.log("Conexión establecida con éxito");
+      })
+      .catch((error) => {
+        console.error("Error al iniciar la conexión:", error);
+      });
+
+    return () => {
+      connection.stop();
+    };
+  }, []);
+
   const handleOpenModal = () => {
-    if (data && data.data.items.some((item) => item.estado === 1)) {
+    if (
+      signalRData &&
+      signalRData.data.items.some((item) => item.estado === 1)
+    ) {
       openModal1();
     }
   };
@@ -41,14 +146,17 @@ const Boletin = () => {
         {error && <div>Error: {error.message}</div>}
         {data && data.data.items && (
           <ul>
-            {data.data.items
-              .filter((item) => item.estado === 1)
-              .slice(0, 1) // Tomar solo el primer elemento después del filtro
-              .map((item) => (
-                <li key={item.id}>
-                  <img src={item.imagen} alt={item.nombre} />
-                </li>
-              ))}
+            {signalRData &&
+              signalRData.data &&
+              signalRData.data.items &&
+              signalRData.data.items
+                .filter((item) => item.estado === 1)
+                .slice(0, 1)
+                .map((item) => (
+                  <li key={item.id}>
+                    <img src={item.imagen} alt={item.nombre} />
+                  </li>
+                ))}
           </ul>
         )}
       </Modal>

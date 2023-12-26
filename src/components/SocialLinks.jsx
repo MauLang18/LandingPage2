@@ -2,14 +2,24 @@ import React from "react";
 import { RiInstagramLine, RiYoutubeLine } from "react-icons/ri";
 import { AiFillLinkedin, AiOutlineFacebook } from "react-icons/ai";
 import { FaTiktok } from "react-icons/fa";
-import { useFetchId } from "../hooks/useFetchId";
+import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
 
 const SocialLinks = ({ textColor, textSize }) => {
-  const INSTAGRAM = useFetchId(5)?.data?.valor || "";
-  const FACEBOOK = useFetchId(6)?.data?.valor || "";
-  const YOUTUBE = useFetchId(7)?.data?.valor || "";
-  const LINKEDIN = useFetchId(8)?.data?.valor || "";
-  const TIKTOK = useFetchId(9)?.data?.valor || "";
+  const INSTAGRAM = useFetchIdAndUpdateSignalR(5) || {};
+  const FACEBOOK = useFetchIdAndUpdateSignalR(6) || {};
+  const YOUTUBE = useFetchIdAndUpdateSignalR(7) || {};
+  const LINKEDIN = useFetchIdAndUpdateSignalR(8) || {};
+  const TIKTOK = useFetchIdAndUpdateSignalR(9) || {};
+
+  const extractValue = (data) => {
+    if (data && data.data && data.data.valor) {
+      return data.data.valor;
+    } else if (data && data.valor) {
+      return data.valor;
+    } else {
+      return "";
+    }
+  };
 
   return (
     <div className="w-full text-center justify-center items-center mx-auto">
@@ -23,35 +33,35 @@ const SocialLinks = ({ textColor, textSize }) => {
         className={`flex items-center justify-center md:justify-center md:mr-10 gap-2 md:gap-4 text-${textColor} md:ml-[52px]`}
       >
         <a
-          href={INSTAGRAM}
+          href={extractValue(INSTAGRAM)}
           target="_blank"
           className={`block p-1 text-${textSize}`}
         >
           <RiInstagramLine />
         </a>
         <a
-          href={FACEBOOK}
+          href={extractValue(FACEBOOK)}
           target="_blank"
           className={`block p-1 text-${textSize}`}
         >
           <AiOutlineFacebook />
         </a>
         <a
-          href={YOUTUBE}
+          href={extractValue(YOUTUBE)}
           target="_blank"
           className={`block p-1 text-${textSize}`}
         >
           <RiYoutubeLine />
         </a>
         <a
-          href={LINKEDIN}
+          href={extractValue(LINKEDIN)}
           target="_blank"
           className={`block p-1 text-${textSize}`}
         >
           <AiFillLinkedin />
         </a>
         <a
-          href={TIKTOK}
+          href={extractValue(TIKTOK)}
           target="_blank"
           className={`block p-1 text-${textSize}`}
         >

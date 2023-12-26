@@ -1,16 +1,26 @@
 import { useState } from "react";
 import "./style.css";
 import { AiOutlineSearch } from "react-icons/ai";
-import { useFetchId } from "../hooks/useFetchId";
+import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
 
 const Tracking = ({ clases }) => {
   const [trackingNumber, setTrackingNumber] = useState("");
 
-  const RASTREO = useFetchId(12)?.data?.valor || "";
+  const RASTREO = useFetchIdAndUpdateSignalR(12) || {};
+
+  const extractValue = (data) => {
+    if (data && data.data && data.data.valor) {
+      return data.data.valor;
+    } else if (data && data.valor) {
+      return data.valor;
+    } else {
+      return "";
+    }
+  };
 
   const handleSearch = () => {
     if (trackingNumber) {
-      window.open(`${RASTREO}/${trackingNumber}`, "_blank");
+      window.open(`${extractValue(RASTREO)}/${trackingNumber}`, "_blank");
     } else {
       alert("Tiene que agregar un número de rastreo");
     }

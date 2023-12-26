@@ -4,7 +4,7 @@ import Bitrix24Form from "../components/Bitrix24Form";
 import { useForm } from "../hooks/useForm2";
 import { useModal } from "../hooks/useModal";
 import Modal from "../components/Modal";
-import { useFetchId } from "../hooks/useFetchId";
+import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
 
 const initialForm = {
   name: "",
@@ -59,9 +59,19 @@ const ContactForm = () => {
     return { __html: term };
   };
 
-  const CORREO_ELECTRONICO = useFetchId(1)?.data?.valor || "";
-  const NUMERO_TELEFONO = useFetchId(2)?.data?.valor || "";
-  const NUMERO_WHATSAPP = useFetchId(3)?.data?.valor || "";
+  const CORREO_ELECTRONICO = useFetchIdAndUpdateSignalR(1) || {};
+  const NUMERO_TELEFONO = useFetchIdAndUpdateSignalR(2) || {};
+  const NUMERO_WHATSAPP = useFetchIdAndUpdateSignalR(3) || {};
+
+  const extractValue = (data) => {
+    if (data && data.data && data.data.valor) {
+      return data.data.valor;
+    } else if (data && data.valor) {
+      return data.valor;
+    } else {
+      return "";
+    }
+  };
 
   return (
     <div className="container mx-auto p-8" id="contacto">
@@ -93,15 +103,15 @@ const ContactForm = () => {
             <ul>
               <li className="mb-1">
                 <b className="lg:text-xl">Correo electrónico</b>
-                <p className="lg:text-lg">{CORREO_ELECTRONICO}</p>
+                <p className="lg:text-lg">{extractValue(CORREO_ELECTRONICO)}</p>
               </li>
               <li className="mb-2">
                 <b className="lg:text-xl">Número de teléfono</b>
-                <p className="lg:text-lg">{NUMERO_TELEFONO}</p>
+                <p className="lg:text-lg">{extractValue(NUMERO_TELEFONO)}</p>
               </li>
               <li>
                 <b className="lg:text-xl">WhatsApp</b>
-                <p className="lg:text-lg">{NUMERO_WHATSAPP}</p>
+                <p className="lg:text-lg">{extractValue(NUMERO_WHATSAPP)}</p>
               </li>
             </ul>
           </div>

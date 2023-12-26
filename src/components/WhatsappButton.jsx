@@ -1,12 +1,22 @@
 import React, { useState } from "react";
 import { RiWhatsappFill } from "react-icons/ri";
-import { useFetchId } from "../hooks/useFetchId";
+import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
 
 const WhatsAppButton = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 20 });
 
-  const WHATSAPP = useFetchId(4)?.data?.valor || "";
+  const WHATSAPP = useFetchIdAndUpdateSignalR(4) || {};
+
+  const extractValue = (data) => {
+    if (data && data.data && data.data.valor) {
+      return data.data.valor;
+    } else if (data && data.valor) {
+      return data.valor;
+    } else {
+      return "";
+    }
+  };
 
   const startDrag = (event) => {
     setIsDragging(true);
@@ -44,7 +54,7 @@ const WhatsAppButton = () => {
         onMouseDown={startDrag}
       >
         <a
-          href={`https://wa.me/${WHATSAPP}`}
+          href={`https://wa.me/${extractValue(WHATSAPP)}`}
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from "react";
+import * as signalR from "@microsoft/signalr";
 import CustomButton from "./CustomButton";
-import { useFetchId } from "../hooks/useFetchId";
+import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
 
 const Accesos = ({ clases, modal, modal1 }) => {
   const handleAlert = (url) => {
     window.open(url, "_blank");
   };
 
-  const ENVIO = useFetchId(11)?.data?.valor || "";
-  const CUENTA = useFetchId(13)?.data?.valor || "";
+  const ENVIO = useFetchIdAndUpdateSignalR(11) || {};
+  const CUENTA = useFetchIdAndUpdateSignalR(13) || {};
+
+  const extractValue = (data) => {
+    if (data && data.data && data.data.valor) {
+      return data.data.valor;
+    } else if (data && data.valor) {
+      return data.valor;
+    } else {
+      return "";
+    }
+  };
 
   return (
     <div
@@ -38,7 +49,7 @@ const Accesos = ({ clases, modal, modal1 }) => {
         className={
           "bg-white text-center text-neutral-700 text-xl font-bold w-full relative group transition-transform transform hover:text-white hover:scale-105 border-t border-neutral-300 hover:bg-amber-500 h-[174px] mt-4 lg:w-[210px]"
         }
-        onClick={() => handleAlert(ENVIO)}
+        onClick={() => handleAlert(extractValue(ENVIO))}
         img={"envio.png"}
         img2={"envio-blanco.png"}
       />
@@ -47,7 +58,7 @@ const Accesos = ({ clases, modal, modal1 }) => {
         className={
           "bg-white text-center text-neutral-700 text-xl font-bold w-full relative group transition-transform transform hover:text-white hover:scale-105 border-t border-neutral-300 hover:bg-amber-500 h-[174px] mt-4 lg:w-[210px]"
         }
-        onClick={() => handleAlert(CUENTA)}
+        onClick={() => handleAlert(extractValue(CUENTA))}
         img={"administrar.png"}
         img2={"administrar-blanco.png"}
       />
