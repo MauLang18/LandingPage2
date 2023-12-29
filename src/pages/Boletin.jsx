@@ -27,19 +27,27 @@ const Boletin = () => {
   }, [data]);
 
   useEffect(() => {
-    const connection = new signalR.HubConnectionBuilder()
+    const connection1 = new signalR.HubConnectionBuilder()
       .withUrl("https://localhost:7072/hub", {
         withCredentials: true,
       })
       .build();
 
-    /*const connection = new signalR.HubConnectionBuilder()
+    const connection2 = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5000/hub", {
+        withCredentials: true,
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets,
+      })
+      .build();
+
+    /*const connection1 = new signalR.HubConnectionBuilder()
         .withUrl("https://apiadmin.tranquiexpress.com/hub", {
           withCredentials: true,
         })
         .build();*/
 
-    connection.on("BoletinRegistrado", (banner) => {
+    connection1.on("BoletinRegistrado", (banner) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data || !prevData.data.items) {
           return { data: { items: [banner] } };
@@ -59,7 +67,7 @@ const Boletin = () => {
       });
     });
 
-    connection.on("BoletinActualizado", (banner) => {
+    connection1.on("BoletinActualizado", (banner) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data) {
           return { data: { items: [] } };
@@ -81,7 +89,29 @@ const Boletin = () => {
       });
     });
 
-    connection.on("BoletinEliminado", (id) => {
+    connection2.on("BoletinActualizado2", (banner) => {
+      setSignalRData((prevData) => {
+        if (!prevData || !prevData.data) {
+          return { data: { items: [] } };
+        }
+
+        const updatedItems = prevData.data.items.map((item) =>
+          item.id === banner.id ? banner : item
+        );
+
+        const updatedData = {
+          ...prevData,
+          data: {
+            ...prevData.data,
+            items: updatedItems,
+          },
+        };
+
+        return updatedData;
+      });
+    });
+
+    connection1.on("BoletinEliminado", (id) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data) {
           return { data: { items: [] } };
@@ -102,17 +132,27 @@ const Boletin = () => {
       });
     });
 
-    connection
-      .start()
-      .then(() => {
-        console.log("Conexión establecida con éxito");
-      })
-      .catch((error) => {
-        console.error("Error al iniciar la conexión:", error);
-      });
+    const startConnections = async () => {
+      try {
+        await connection1.start();
+        console.log("Conexión 1 establecida con éxito");
+      } catch (error) {
+        console.error("Error al iniciar la conexión 1:", error);
+      }
+
+      try {
+        await connection2.start();
+        console.log("Conexión 2 establecida con éxito");
+      } catch (error) {
+        console.error("Error al iniciar la conexión 2:", error);
+      }
+    };
+
+    startConnections();
 
     return () => {
-      connection.stop();
+      connection1.stop();
+      connection2.stop();
     };
   }, []);
 
@@ -144,21 +184,25 @@ const Boletin = () => {
       <Modal isOpen={isOpenModal1} closeModal={closeModal1}>
         {loading && <div>Loading...</div>}
         {error && <div>Error: {error.message}</div>}
-        {data && data.data.items && (
-          <ul>
-            {signalRData &&
-              signalRData.data &&
-              signalRData.data.items &&
-              signalRData.data.items
-                .filter((item) => item.estado === 1)
-                .slice(0, 1)
-                .map((item) => (
-                  <li key={item.id}>
-                    <img src={item.imagen} alt={item.nombre} />
-                  </li>
-                ))}
-          </ul>
-        )}
+        {data &&
+          data.data &&
+          signalRData &&
+          signalRData.data &&
+          signalRData.data.items && (
+            <ul>
+              {signalRData &&
+                signalRData.data &&
+                signalRData.data.items &&
+                signalRData.data.items
+                  .filter((item) => item.estado === 1)
+                  .slice(0, 1)
+                  .map((item) => (
+                    <li key={item.id}>
+                      <img src={item.imagen} alt={item.nombre} />
+                    </li>
+                  ))}
+            </ul>
+          )}
       </Modal>
     </section>
   );

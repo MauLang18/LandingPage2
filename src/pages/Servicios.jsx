@@ -22,9 +22,17 @@ const Servicios = () => {
   }, [data]);
 
   useEffect(() => {
-    const connection = new signalR.HubConnectionBuilder()
+    const connection1 = new signalR.HubConnectionBuilder()
       .withUrl("https://localhost:7072/hub", {
         withCredentials: true,
+      })
+      .build();
+
+    const connection2 = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5000/hub", {
+        withCredentials: true,
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets,
       })
       .build();
 
@@ -34,7 +42,7 @@ const Servicios = () => {
         })
         .build();*/
 
-    connection.on("ServicioBeneficioRegistrado", (banner) => {
+    connection1.on("ServicioBeneficioRegistrado", (banner) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data || !prevData.data.items) {
           return { data: { items: [banner] } };
@@ -54,7 +62,7 @@ const Servicios = () => {
       });
     });
 
-    connection.on("ServicioBeneficioActualizado", (banner) => {
+    connection1.on("ServicioBeneficioActualizado", (banner) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data) {
           return { data: { items: [] } };
@@ -76,7 +84,29 @@ const Servicios = () => {
       });
     });
 
-    connection.on("ServicioBeneficioEliminado", (id) => {
+    connection2.on("ServicioBeneficioActualizado2", (banner) => {
+      setSignalRData((prevData) => {
+        if (!prevData || !prevData.data) {
+          return { data: { items: [] } };
+        }
+
+        const updatedItems = prevData.data.items.map((item) =>
+          item.id === banner.id ? banner : item
+        );
+
+        const updatedData = {
+          ...prevData,
+          data: {
+            ...prevData.data,
+            items: updatedItems,
+          },
+        };
+
+        return updatedData;
+      });
+    });
+
+    connection1.on("ServicioBeneficioEliminado", (id) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data) {
           return { data: { items: [] } };
@@ -97,17 +127,27 @@ const Servicios = () => {
       });
     });
 
-    connection
-      .start()
-      .then(() => {
-        console.log("Conexión establecida con éxito");
-      })
-      .catch((error) => {
-        console.error("Error al iniciar la conexión:", error);
-      });
+    const startConnections = async () => {
+      try {
+        await connection1.start();
+        console.log("Conexión 1 establecida con éxito");
+      } catch (error) {
+        console.error("Error al iniciar la conexión 1:", error);
+      }
+
+      try {
+        await connection2.start();
+        console.log("Conexión 2 establecida con éxito");
+      } catch (error) {
+        console.error("Error al iniciar la conexión 2:", error);
+      }
+    };
+
+    startConnections();
 
     return () => {
-      connection.stop();
+      connection1.stop();
+      connection2.stop();
     };
   }, []);
 

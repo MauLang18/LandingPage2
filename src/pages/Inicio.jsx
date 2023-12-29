@@ -31,19 +31,27 @@ const Inicio = () => {
   }, [data]);
 
   useEffect(() => {
-    const connection = new signalR.HubConnectionBuilder()
+    const connection1 = new signalR.HubConnectionBuilder()
       .withUrl("https://localhost:7072/hub", {
         withCredentials: true,
       })
       .build();
 
-    /*const connection = new signalR.HubConnectionBuilder()
+    const connection2 = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5000/hub", {
+        withCredentials: true,
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets,
+      })
+      .build();
+
+    /*const connection1 = new signalR.HubConnectionBuilder()
         .withUrl("https://apiadmin.tranquiexpress.com/hub", {
           withCredentials: true,
         })
         .build();*/
 
-    connection.on("BannerRegistrado", (banner) => {
+    connection1.on("BannerRegistrado", (banner) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data || !prevData.data.items) {
           return { data: { items: [banner] } };
@@ -63,7 +71,7 @@ const Inicio = () => {
       });
     });
 
-    connection.on("BannerActualizado", (banner) => {
+    connection1.on("BannerActualizado", (banner) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data) {
           return { data: { items: [] } };
@@ -85,7 +93,30 @@ const Inicio = () => {
       });
     });
 
-    connection.on("BannerEliminado", (id) => {
+    connection2.on("BannerActualizado2", (banner) => {
+      console.log(banner);
+      setSignalRData((prevData) => {
+        if (!prevData || !prevData.data) {
+          return { data: { items: [] } };
+        }
+
+        const updatedItems = prevData.data.items.map((item) =>
+          item.id === banner.id ? banner : item
+        );
+
+        const updatedData = {
+          ...prevData,
+          data: {
+            ...prevData.data,
+            items: updatedItems,
+          },
+        };
+
+        return updatedData;
+      });
+    });
+
+    connection1.on("BannerEliminado", (id) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data) {
           return { data: { items: [] } };
@@ -106,17 +137,27 @@ const Inicio = () => {
       });
     });
 
-    connection
-      .start()
-      .then(() => {
-        console.log("Conexión establecida con éxito");
-      })
-      .catch((error) => {
-        console.error("Error al iniciar la conexión:", error);
-      });
+    const startConnections = async () => {
+      try {
+        await connection1.start();
+        console.log("Conexión 1 establecida con éxito");
+      } catch (error) {
+        console.error("Error al iniciar la conexión 1:", error);
+      }
+
+      try {
+        await connection2.start();
+        console.log("Conexión 2 establecida con éxito");
+      } catch (error) {
+        console.error("Error al iniciar la conexión 2:", error);
+      }
+    };
+
+    startConnections();
 
     return () => {
-      connection.stop();
+      connection1.stop();
+      connection2.stop();
     };
   }, []);
 
