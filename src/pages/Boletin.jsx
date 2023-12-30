@@ -11,7 +11,7 @@ const Boletin = () => {
   const [isOpenModal1, openModal1, closeModal1] = useModal(false);
 
   const { data, loading, error, setData } = useFetch(
-    `https://localhost:7072/api/Boletin`
+    `https://localhost:7215/Boletin`
   );
 
   /*const { data, loading, error } = useFetch(
@@ -28,13 +28,15 @@ const Boletin = () => {
 
   useEffect(() => {
     const connection1 = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7072/hub", {
+      .withUrl("https://localhost:7215/hub1", {
         withCredentials: true,
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets,
       })
       .build();
 
     const connection2 = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5000/hub", {
+      .withUrl("https://localhost:7215/hub2", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,

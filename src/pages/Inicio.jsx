@@ -15,7 +15,7 @@ const Inicio = () => {
   const isMobile = window.innerWidth <= 768;
 
   const { data, loading, error, setData } = useFetch(
-    `https://localhost:7072/api/BannerPrincipal`
+    `https://localhost:7215/BannerPrincipal`
   );
 
   /*const { data, loading, error, setData } = useFetch(
@@ -32,13 +32,15 @@ const Inicio = () => {
 
   useEffect(() => {
     const connection1 = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7072/hub", {
+      .withUrl("https://localhost:7215/hub1", {
         withCredentials: true,
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets,
       })
       .build();
 
     const connection2 = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5000/hub", {
+      .withUrl("https://localhost:7215/hub2", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,

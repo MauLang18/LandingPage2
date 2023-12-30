@@ -7,9 +7,7 @@ const useFetchIdAndUpdateSignalR = (id) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `https://localhost:7072/api/Parametro/${id}`
-        );
+        const response = await fetch(`https://localhost:7215/Parametro/${id}`);
         const jsonData = await response.json();
         setData(jsonData);
       } catch (error) {
@@ -20,8 +18,10 @@ const useFetchIdAndUpdateSignalR = (id) => {
     fetchData();
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7072/hub", {
+      .withUrl("https://localhost:7215/hub1", {
         withCredentials: true,
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets,
       })
       .build();
 
