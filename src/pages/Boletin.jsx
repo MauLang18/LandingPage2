@@ -11,12 +11,8 @@ const Boletin = () => {
   const [isOpenModal1, openModal1, closeModal1] = useModal(false);
 
   const { data, loading, error, setData } = useFetch(
-    `https://localhost:7215/Boletin`
+    `https://apiadmin.tranquiexpress.com:8443/Boletin`
   );
-
-  /*const { data, loading, error } = useFetch(
-    `https://apiadmin.tranquiexpress.com/api/Boletin`
-  );*/
 
   const [signalRData, setSignalRData] = useState(null);
 
@@ -28,7 +24,7 @@ const Boletin = () => {
 
   useEffect(() => {
     const connection1 = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7215/hub1", {
+      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub1", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
@@ -36,7 +32,7 @@ const Boletin = () => {
       .build();
 
     const connection2 = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7215/hub2", {
+      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub2", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,

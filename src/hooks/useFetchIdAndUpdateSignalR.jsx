@@ -7,7 +7,9 @@ const useFetchIdAndUpdateSignalR = (id) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`https://localhost:7215/Parametro/${id}`);
+        const response = await fetch(
+          `https://apiadmin.tranquiexpress.com:8443/Parametro/${id}`
+        );
         const jsonData = await response.json();
         setData(jsonData);
       } catch (error) {
@@ -18,7 +20,7 @@ const useFetchIdAndUpdateSignalR = (id) => {
     fetchData();
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7215/hub1", {
+      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub1", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,

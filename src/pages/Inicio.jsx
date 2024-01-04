@@ -15,12 +15,8 @@ const Inicio = () => {
   const isMobile = window.innerWidth <= 768;
 
   const { data, loading, error, setData } = useFetch(
-    `https://localhost:7215/BannerPrincipal`
+    `https://apiadmin.tranquiexpress.com:8443/BannerPrincipal`
   );
-
-  /*const { data, loading, error, setData } = useFetch(
-    `https://apiadmin.tranquiexpress.com/api/BannerPrincipal`
-  );*/
 
   const [signalRData, setSignalRData] = useState(null);
 
@@ -32,7 +28,7 @@ const Inicio = () => {
 
   useEffect(() => {
     const connection1 = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7215/hub1", {
+      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub1", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
@@ -40,7 +36,7 @@ const Inicio = () => {
       .build();
 
     const connection2 = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7215/hub2", {
+      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub2", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
