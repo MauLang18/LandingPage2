@@ -1,4 +1,4 @@
-import Header from "../pages/header";
+import Header from "../pages/Header";
 import Inicio from "../pages/Inicio";
 import Boletin from "../pages/Boletin";
 import Nosotros from "../pages/Nosotros";
