@@ -1,8 +1,22 @@
 import "./style.css";
-import InfoPanel from "../components/InfoPanel";
 import SectionData from "../components/SectionData";
+import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
 
 const Nosotros = () => {
+  const MISION = useFetchIdAndUpdateSignalR(16) || {};
+  const VISION = useFetchIdAndUpdateSignalR(17) || {};
+  const VALORES = useFetchIdAndUpdateSignalR(18) || {};
+
+  const extractValue = (data) => {
+    if (data && data.data && data.data.valor) {
+      return data.data.valor;
+    } else if (data && data.valor) {
+      return data.valor;
+    } else {
+      return "";
+    }
+  };
+
   const imageData = {
     imageSrc: "nosotros.png",
   };
@@ -10,9 +24,9 @@ const Nosotros = () => {
   const sectionData = {
     titles: ["Misión", "Visión", "Valores"],
     contents: [
-      "Ser líderes y considerados como la mejor opción en el sector de entregas express a nivel nacional, rompiendo tiempo récord de entregas y brindando un servicio de calidad que sea eficiente, productivo, seguro e innovador el cual tenga como resultado optimizar los recursos de nuestros clientes, ofreciéndoles el mayor valor por un mismo monto.",
-      "Convertirnos en una empresa que pueda crear alto valor y confiabilidad para la sociedad a largo plazo. Permita que tanto nuestros clientes de envío como de recepción sientan que la entrega de paquetes está a un solo clic de distancia y seguro.",
-      "Centrarse en las necesidades del cliente, basado en la integridad, trabajo en equipo y apasionado, aprendizaje y mejora continua e innovación.",
+      extractValue(MISION),
+      extractValue(VISION),
+      extractValue(VALORES),
     ],
   };
   return (
