@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import Home from "./screen/home";
+import Home from "./screen/Home";
 import Envio from "./screen/Envio";
 import AdministrarCuenta from "./screen/AdministrarCuenta";
 import Rastreo from "./screen/Rastreo";
