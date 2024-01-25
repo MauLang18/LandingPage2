@@ -114,7 +114,7 @@ const Boletin = () => {
   const handleOpenModal = () => {
     if (
       signalRData &&
-      signalRData.data.items.some((item) => item.estado === 1)
+      signalRData.data.items.some((item) => item.estado === 1 && item.empresaId === 2)
     ) {
       openModal1();
     }
