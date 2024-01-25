@@ -7,7 +7,7 @@ import Mas from "../pages/Mas";
 import ContactUs from "../pages/ContactUs";
 import WhatsAppButton from "../components/WhatsappButton";
 import Footer from "../pages/Footer";
-import Descarga from "../pages/Descarga";
+//import Descarga from "../pages/Descarga";
 
 function Home() {
   return (

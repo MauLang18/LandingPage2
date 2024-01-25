@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import * as signalR from "@microsoft/signalr";
 import { Carousel } from "react-responsive-carousel";
 import Tracking from "../components/Tracking";
@@ -14,8 +14,8 @@ const Inicio = () => {
   const [isOpenModal1, openModal1, closeModal1] = useModal(false);
   const isMobile = window.innerWidth <= 768;
 
-  const { data, loading, error, setData } = useFetch(
-    `https://apiadmin.tranquiexpress.com:8443/BannerPrincipal`
+  const { data } = useFetch(
+    `http://localhost:9090/BannerPrincipal`
   );
 
   const [signalRData, setSignalRData] = useState(null);
@@ -27,29 +27,15 @@ const Inicio = () => {
   }, [data]);
 
   useEffect(() => {
-    const connection1 = new signalR.HubConnectionBuilder()
-      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub1", {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:9090/hub", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
       })
       .build();
 
-    const connection2 = new signalR.HubConnectionBuilder()
-      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub2", {
-        withCredentials: true,
-        skipNegotiation: true,
-        transport: signalR.HttpTransportType.WebSockets,
-      })
-      .build();
-
-    /*const connection1 = new signalR.HubConnectionBuilder()
-        .withUrl("https://apiadmin.tranquiexpress.com/hub", {
-          withCredentials: true,
-        })
-        .build();*/
-
-    connection1.on("BannerRegistrado", (banner) => {
+    connection.on("BannerRegistrado", (banner) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data || !prevData.data.items) {
           return { data: { items: [banner] } };
@@ -69,7 +55,7 @@ const Inicio = () => {
       });
     });
 
-    connection1.on("BannerActualizado", (banner) => {
+    connection.on("BannerActualizado", (banner) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data) {
           return { data: { items: [] } };
@@ -91,30 +77,7 @@ const Inicio = () => {
       });
     });
 
-    connection2.on("BannerActualizado2", (banner) => {
-      console.log(banner);
-      setSignalRData((prevData) => {
-        if (!prevData || !prevData.data) {
-          return { data: { items: [] } };
-        }
-
-        const updatedItems = prevData.data.items.map((item) =>
-          item.id === banner.id ? banner : item
-        );
-
-        const updatedData = {
-          ...prevData,
-          data: {
-            ...prevData.data,
-            items: updatedItems,
-          },
-        };
-
-        return updatedData;
-      });
-    });
-
-    connection1.on("BannerEliminado", (id) => {
+    connection.on("BannerEliminado", (id) => {
       setSignalRData((prevData) => {
         if (!prevData || !prevData.data) {
           return { data: { items: [] } };
@@ -137,25 +100,17 @@ const Inicio = () => {
 
     const startConnections = async () => {
       try {
-        await connection1.start();
-        console.log("Conexión 1 establecida con éxito");
+        await connection.start();
+        console.log("Conexión establecida con éxito");
       } catch (error) {
-        console.error("Error al iniciar la conexión 1:", error);
-      }
-
-      try {
-        await connection2.start();
-        console.log("Conexión 2 establecida con éxito");
-      } catch (error) {
-        console.error("Error al iniciar la conexión 2:", error);
+        console.error("Error al iniciar la conexión:", error);
       }
     };
 
     startConnections();
 
     return () => {
-      connection1.stop();
-      connection2.stop();
+      connection.stop();
     };
   }, []);
 
@@ -177,7 +132,7 @@ const Inicio = () => {
           signalRData.data &&
           signalRData.data.items &&
           signalRData.data.items
-            .filter((item) => item.estado === 1)
+            .filter((item) => item.estado === 1 && item.empresaId === 2)
             .map((item) => (
               <div key={item.id}>
                 <img

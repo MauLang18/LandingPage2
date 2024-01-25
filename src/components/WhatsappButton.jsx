@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { RiWhatsappFill } from "react-icons/ri";
 import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
 
@@ -54,7 +54,7 @@ const WhatsAppButton = () => {
         onMouseDown={startDrag}
       >
         <a
-          href={`https://wa.me/${extractValue(WHATSAPP)}`}
+          href={`https://api.whatsapp.com/send?phone=${extractValue(WHATSAPP)}`}
           target="_blank"
           rel="noopener noreferrer"
         >
