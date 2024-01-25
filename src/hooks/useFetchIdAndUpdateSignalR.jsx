@@ -8,7 +8,7 @@ const useFetchIdAndUpdateSignalR = (id) => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:9090/Parametro/${id}`
+          `https://apiadmin.tranquiexpress.com:8443/Parametro/${id}`
         );
         const jsonData = await response.json();
         setData(jsonData);
@@ -20,7 +20,7 @@ const useFetchIdAndUpdateSignalR = (id) => {
     fetchData();
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:9090/hub", {
+      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,

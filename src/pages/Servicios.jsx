@@ -6,7 +6,7 @@ import { useFetch } from "../hooks/useFetch";
 
 const Servicios = () => {
   const { data } = useFetch(
-    `http://localhost:9090/ServicioBeneficio`
+    `https://apiadmin.tranquiexpress.com:8443/ServicioBeneficio`
   );
 
   const [signalRData, setSignalRData] = useState(null);
@@ -19,7 +19,7 @@ const Servicios = () => {
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:9090/hub", {
+      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,

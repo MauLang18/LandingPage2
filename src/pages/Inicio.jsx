@@ -15,7 +15,7 @@ const Inicio = () => {
   const isMobile = window.innerWidth <= 768;
 
   const { data } = useFetch(
-    `http://localhost:9090/BannerPrincipal`
+    `https://apiadmin.tranquiexpress.com:8443/BannerPrincipal`
   );
 
   const [signalRData, setSignalRData] = useState(null);
@@ -28,7 +28,7 @@ const Inicio = () => {
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:9090/hub", {
+      .withUrl("https://apiadmin.tranquiexpress.com:8443/hub", {
         withCredentials: true,
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
