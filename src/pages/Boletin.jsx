@@ -11,7 +11,7 @@ const Boletin = () => {
   const [isOpenModal1, openModal1, closeModal1] = useModal(false);
 
   const { data, loading, error } = useFetch(
-    `https://apiadmin.tranquiexpress.com:8443/Boletin`
+    `https://apiadmin.tranquiexpress.com:8443/Boletin?empresa=2`
   );
 
   const [signalRData, setSignalRData] = useState(null);
@@ -30,7 +30,6 @@ const Boletin = () => {
         transport: signalR.HttpTransportType.WebSockets,
       })
       .build();
-
 
     connection.on("BoletinRegistrado", (banner) => {
       setSignalRData((prevData) => {
@@ -114,7 +113,9 @@ const Boletin = () => {
   const handleOpenModal = () => {
     if (
       signalRData &&
-      signalRData.data.items.some((item) => item.estado === 1 && item.empresaId === 2)
+      signalRData.data.items.some(
+        (item) => item.estado === 1 && item.empresaId === 2
+      )
     ) {
       openModal1();
     }
