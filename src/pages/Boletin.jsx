@@ -106,7 +106,7 @@ const Boletin = () => {
     if (
       signalRData &&
       signalRData.data.items.some(
-        (item) => item.estado === 1 && item.empresaId === 2
+        (item) => (item.estado === 1 && item.empresaId === 2) || (item.Estado === 1 && item.EmpresaId)
       )
     ) {
       openModal1();
@@ -142,11 +142,11 @@ const Boletin = () => {
                 signalRData.data &&
                 signalRData.data.items &&
                 signalRData.data.items
-                  .filter((item) => item.estado === 1 && item.empresaId === 2)
+                  .filter((item) => (item.estado === 1 && item.empresaId === 2) || (item.Estado === 1 && item.EmpresaId))
                   .slice(0, 1)
                   .map((item) => (
-                    <li key={item.id}>
-                      <img src={item.imagen} alt={item.nombre} />
+                    <li key={item.id || item.Id}>
+                      <img src={item.imagen || item.Imagen} alt={item.nombre || item.Nombre} />
                     </li>
                   ))}
             </ul>

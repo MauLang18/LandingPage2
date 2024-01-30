@@ -112,13 +112,13 @@ const Servicios = () => {
               signalRData.data &&
               signalRData.data.items &&
               signalRData.data.items
-                .filter((item) => item.estado === 1 && item.empresaId === 2)
+                .filter((item) => (item.estado === 1 && item.empresaId === 2) || (item.Estado === 1 && item.EmpresaId))
                 .map((item, index) => (
                   <AlternateImageText
-                    key={item.id}
-                    imageSrc={item.imagen}
-                    title={item.titulo}
-                    content={item.descripcion}
+                    key={item.id || item.Id}
+                    imageSrc={item.imagen || item.Imagen}
+                    title={item.titulo || item.Titulo}
+                    content={item.descripcion || item.Descripcion}
                     imageFirst={index % 2 === 0}
                   />
                 ))}
