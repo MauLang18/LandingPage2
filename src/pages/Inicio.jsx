@@ -123,7 +123,7 @@ const Inicio = () => {
           signalRData.data &&
           signalRData.data.items &&
           signalRData.data.items
-            .filter((item) => (item.estado === 1 && item.empresaId === 2) || (item.Estado === 1 && item.EmpresaId))
+            .filter((item) => (item.estado === 1 && item.empresaId === 2) || (item.Estado === 1 && item.EmpresaId === 2))
             .map((item) => (
               <div key={item.id || item.Id}>
                 <img
