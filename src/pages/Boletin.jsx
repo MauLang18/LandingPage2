@@ -31,68 +31,60 @@ const Boletin = () => {
       })
       .build();
 
-    connection.on("BoletinRegistrado", (banner) => {
-      setSignalRData((prevData) => {
-        if (!prevData || !prevData.data || !prevData.data.items) {
-          return { data: { items: [banner] } };
+      connection.on("PublishCore", (boletin) => {
+        // Convierte la cadena JSON en un objeto
+        const item = JSON.parse(boletin);
+      
+        const isEmpresaIdValid = item && item.EmpresaId === 2;
+        const isDirigidoValid =
+          item &&
+            (item.Dirigido === "boletinRegistrado" ||
+            item.Dirigido === "boletinActualizado" ||
+            item.Dirigido === "boletinEliminado");
+      
+        if (isEmpresaIdValid && isDirigidoValid) {
+          setSignalRData((prevData) => {
+            if (!prevData || !prevData.data || !prevData.data.items) {
+              return { data: { items: [item] } };
+            }
+      
+            if (item.Dirigido === "boletinRegistrado") {
+              const updatedItems = [...prevData.data.items, item];
+              const updatedData = {
+                ...prevData,
+                data: {
+                  ...prevData.data,
+                  items: updatedItems,
+                },
+              };
+              return updatedData;
+            } else if (item.Dirigido === "boletinActualizado") {
+              const updatedItems = prevData.data.items.map((prevItem) =>
+                prevItem.id === item.Id ? item : prevItem
+              );
+              const updatedData = {
+                ...prevData,
+                data: {
+                  ...prevData.data,
+                  items: updatedItems,
+                },
+              };
+              return updatedData;
+            } else if (item.Dirigido === "boletinEliminado") {
+              const filteredItems = prevData.data.items.filter(
+                (prevItem) => prevItem.id !== item.Id
+              );
+              const updatedData = {
+                ...prevData,
+                data: {
+                  items: filteredItems,
+                },
+              };
+              return updatedData;
+            }
+          });
         }
-
-        const updatedItems = [...prevData.data.items, banner];
-
-        const updatedData = {
-          ...prevData,
-          data: {
-            ...prevData.data,
-            items: updatedItems,
-          },
-        };
-
-        return updatedData;
       });
-    });
-
-    connection.on("BoletinActualizado", (banner) => {
-      setSignalRData((prevData) => {
-        if (!prevData || !prevData.data) {
-          return { data: { items: [] } };
-        }
-
-        const updatedItems = prevData.data.items.map((item) =>
-          item.id === banner.id ? banner : item
-        );
-
-        const updatedData = {
-          ...prevData,
-          data: {
-            ...prevData.data,
-            items: updatedItems,
-          },
-        };
-
-        return updatedData;
-      });
-    });
-
-    connection.on("BoletinEliminado", (id) => {
-      setSignalRData((prevData) => {
-        if (!prevData || !prevData.data) {
-          return { data: { items: [] } };
-        }
-
-        const filteredItems = prevData.data.items.filter(
-          (item) => item.id !== id
-        );
-
-        const updatedData = {
-          ...prevData,
-          data: {
-            items: filteredItems,
-          },
-        };
-
-        return updatedData;
-      });
-    });
 
     const startConnections = async () => {
       try {

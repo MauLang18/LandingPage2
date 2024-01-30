@@ -26,68 +26,60 @@ const Servicios = () => {
       })
       .build();
 
-    connection.on("ServicioBeneficioRegistrado", (banner) => {
-      setSignalRData((prevData) => {
-        if (!prevData || !prevData.data || !prevData.data.items) {
-          return { data: { items: [banner] } };
+      connection.on("PublishCore", (servicioBeneficio) => {
+        // Convierte la cadena JSON en un objeto
+        const item = JSON.parse(servicioBeneficio);
+      
+        const isEmpresaIdValid = item && item.EmpresaId === 2;
+        const isDirigidoValid =
+          item &&
+            (item.Dirigido === "servicioBeneficioRegistrado" ||
+            item.Dirigido === "servicioBeneficioActualizado" ||
+            item.Dirigido === "servicioBeneficioEliminado");
+      
+        if (isEmpresaIdValid && isDirigidoValid) {
+          setSignalRData((prevData) => {
+            if (!prevData || !prevData.data || !prevData.data.items) {
+              return { data: { items: [item] } };
+            }
+      
+            if (item.Dirigido === "servicioBeneficioRegistrado") {
+              const updatedItems = [...prevData.data.items, item];
+              const updatedData = {
+                ...prevData,
+                data: {
+                  ...prevData.data,
+                  items: updatedItems,
+                },
+              };
+              return updatedData;
+            } else if (item.Dirigido === "servicioBeneficioActualizado") {
+              const updatedItems = prevData.data.items.map((prevItem) =>
+                prevItem.id === item.Id ? item : prevItem
+              );
+              const updatedData = {
+                ...prevData,
+                data: {
+                  ...prevData.data,
+                  items: updatedItems,
+                },
+              };
+              return updatedData;
+            } else if (item.Dirigido === "servicioBeneficioEliminado") {
+              const filteredItems = prevData.data.items.filter(
+                (prevItem) => prevItem.id !== item.Id
+              );
+              const updatedData = {
+                ...prevData,
+                data: {
+                  items: filteredItems,
+                },
+              };
+              return updatedData;
+            }
+          });
         }
-
-        const updatedItems = [...prevData.data.items, banner];
-
-        const updatedData = {
-          ...prevData,
-          data: {
-            ...prevData.data,
-            items: updatedItems,
-          },
-        };
-
-        return updatedData;
       });
-    });
-
-    connection.on("ServicioBeneficioActualizado", (banner) => {
-      setSignalRData((prevData) => {
-        if (!prevData || !prevData.data) {
-          return { data: { items: [] } };
-        }
-
-        const updatedItems = prevData.data.items.map((item) =>
-          item.id === banner.id ? banner : item
-        );
-
-        const updatedData = {
-          ...prevData,
-          data: {
-            ...prevData.data,
-            items: updatedItems,
-          },
-        };
-
-        return updatedData;
-      });
-    });
-
-    connection.on("ServicioBeneficioEliminado", (id) => {
-      setSignalRData((prevData) => {
-        if (!prevData || !prevData.data) {
-          return { data: { items: [] } };
-        }
-
-        const filteredItems = prevData.data.items.filter(
-          (item) => item.id !== id
-        );
-
-        const updatedData = {
-          ...prevData,
-          data: {
-            items: filteredItems,
-          },
-        };
-
-        return updatedData;
-      });
-    });
 
     const startConnections = async () => {
       try {

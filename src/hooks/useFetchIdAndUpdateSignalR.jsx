@@ -36,11 +36,18 @@ const useFetchIdAndUpdateSignalR = (id) => {
         console.error("Error al iniciar la conexión:", error);
       });
 
-    connection.on("ParametroActualizado", (updatedData) => {
-      if (updatedData.id === id) {
-        setData(updatedData);
-      }
-    });
+      connection.on("PublishCore", (updatedData) => {
+        // Muestra la propiedad 'Dirigido' del objeto
+        const item = JSON.parse(updatedData);
+  
+        const isEmpresaIdValid = item.EmpresaId === 2;
+        const isDirigidoValid = item.Dirigido === "parametroActualizado";
+        const isIdValid = item.Id === id;
+      
+        if (isEmpresaIdValid && isDirigidoValid && isIdValid) {
+          setData(item);
+        }
+      });
 
     return () => {
       connection.stop();
