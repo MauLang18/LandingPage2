@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from "../hooks/useForm";
 
 const initialForm = {
@@ -16,6 +17,9 @@ const initialForm = {
   fragil: "",
   quimico: "",
   message: "",
+  cuenta: "",
+  nombreEmpresa: "",
+  cedula: "",
 };
 
 const validateForm = (form) => {
@@ -33,20 +37,26 @@ const validateForm = (form) => {
   if (!form.email.trim()) {
     errores.email = "El campo 'Correo' es requerido";
   }
-  if (!form.phone.trim()) {
-    errores.phone = "El campo 'Teléfono' es requerido";
-  }
   if (!form.fechaRecoleccion.trim()) {
-    errores.phone = "El campo 'Fecha de recolección' es requerido";
+    errores.fechaRecoleccion = "El campo 'Fecha de recolección' es requerido";
   }
   if (!form.horaRecoleccion.trim()) {
-    errores.phone = "El campo 'Hora de recolección' es requerido";
+    errores.horaRecoleccion = "El campo 'Hora de recolección' es requerido";
+  }
+  if (form.cuenta === "Si") {
+    if (!form.nombreEmpresa.trim()) {
+      errores.usuario = "El campo 'Nombre de Empresa' es requerido";
+    }
+    if (!form.cedula.trim()) {
+      errores.contrasena = "El campo 'Cedula' es requerido";
+    }
   }
 
   return errores;
 };
 
 const ProgramarRecoleccionForm = ({ closeModal }) => {
+  const [cuenta, setCuenta] = useState("");
   const {
     form,
     errores,
@@ -57,6 +67,11 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
     handleSubmit,
   } = useForm(initialForm, validateForm, () => closeModal());
 
+  const handleCuentaChange = (e) => {
+    handleChange(e);
+    setCuenta(e.target.value);
+  };
+
   return (
     <form className="shake" onSubmit={handleSubmit}>
       <div className="flex lg:flex-row items-center w-auto h-[121px] bg-white">
@@ -66,6 +81,71 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
           className="md:w-[275px] md:h-[275px] w-[200px] h-[200px] mr-[-30px] ml-[-25px] md:ml-0 md:mr-[500px] mb-4 md:mb-0 flex-shrink-0"
         />
       </div>
+      <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="cuenta"
+        >
+          ¿Ya tienes una cuenta?
+        </label>
+        <select
+          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="cuenta"
+          name="cuenta"
+          value={form.cuenta}
+          onBlur={handleBlur}
+          onChange={handleCuentaChange}
+          required
+        >
+          <option value="">Selecciona una opción</option>
+          <option value="Si">Sí</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+      {cuenta === "Si" && (
+        <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="nombreEmpresa"
+          >
+            Nombre Empresa
+          </label>
+          <input
+            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="nombreEmpresa"
+            type="text"
+            name="nombreEmpresa"
+            placeholder="Ingrese su nombre de empresa"
+            onBlur={handleBlur}
+            onChange={handleChange}
+            value={form.nombreEmpresa}
+            required
+          />
+          {errores.nombreEmpresa && (
+            <p className="font-bold text-red-500">{errores.nombreEmpresa}</p>
+          )}
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2 mt-4"
+            htmlFor="cedula"
+          >
+            Cedula
+          </label>
+          <input
+            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="cedula"
+            type="text"
+            name="cedula"
+            placeholder="Ingrese su cedula"
+            onBlur={handleBlur}
+            onChange={handleChange}
+            value={form.cedula}
+            required
+          />
+          {errores.cedula && (
+            <p className="font-bold text-red-500">{errores.cedula}</p>
+          )}
+        </div>
+      )}
       <label className="block text-gray-700 text-md font-bold mb-4 mt-10">
         Información de usuario
       </label>
