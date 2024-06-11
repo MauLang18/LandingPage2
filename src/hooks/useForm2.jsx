@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { helpHttp } from "../helpers/helpHttp";
+import emailjs from 'emailjs-com';
 
 export const useForm = (initialForm, validateForm) => {
   const [form, setForm] = useState(initialForm);
@@ -26,30 +26,18 @@ export const useForm = (initialForm, validateForm) => {
 
     if (Object.keys(errores).length === 0) {
       setLoading(true);
-      helpHttp()
-        .post("https://formsubmit.co/ajax/info@tranquiexpress.com", {
-          body: form,
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        })
+      emailjs
+      .sendForm(
+        "service_3bgd05m",
+        "template_xxc8fac",
+        e.target,
+        "jYCGvRGBv-9WkRRx4"
+      )
         .then((res) => {
           setLoading(false);
           alert("Mensaje enviado.");
           setResponse(true);
         });
-      // helpHttp()
-      //   .post("https://apiadmin.tranquiexpress.com/api/Auth/Login", {
-      //     body: form,
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Accept: "application/json",
-      //     },
-      //   })
-      //   .then((res) => {
-      //     console.log(res.data);
-      //   });
     } else {
       return;
     }

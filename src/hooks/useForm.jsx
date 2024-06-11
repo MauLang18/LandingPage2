@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { helpHttp } from "../helpers/helpHttp";
+import emailjs from 'emailjs-com';
 
 export const useForm = (initialForm, validateForm, closeModal) => {
   const [form, setForm] = useState(initialForm);
@@ -26,14 +26,13 @@ export const useForm = (initialForm, validateForm, closeModal) => {
 
     if (Object.keys(errores).length === 0) {
       setLoading(true);
-      helpHttp()
-        .post("https://formsubmit.co/ajax/info@tranquiexpress.com", {
-          body: form,
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        })
+      emailjs
+      .sendForm(
+        "service_3bgd05m",
+        "template_0tsra3b",
+        e.target,
+        "jYCGvRGBv-9WkRRx4"
+      )
         .then((res) => {
           setLoading(false);
           const confirmacion = window.confirm(
