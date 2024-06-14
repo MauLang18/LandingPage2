@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from "../hooks/useForm";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const initialForm = {
   name: "",
@@ -10,12 +11,11 @@ const initialForm = {
   horaRecoleccion: "",
   lugarRecoleccion: "",
   fechaEntrega: "",
-  desde: "",
-  hasta: "",
+  horaEntrega: "",
+  lugarEntrega: "",
   paquetes: "",
   desc: "",
   fragil: "",
-  quimico: "",
   message: "",
   cuenta: "",
   nombreEmpresa: "",
@@ -56,6 +56,7 @@ const validateForm = (form) => {
 };
 
 const ProgramarRecoleccionForm = ({ closeModal }) => {
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
   const [cuenta, setCuenta] = useState("");
   const {
     form,
@@ -66,6 +67,10 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
     handleBlur,
     handleSubmit,
   } = useForm(initialForm, validateForm, () => closeModal());
+
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+  };
 
   const handleCuentaChange = (e) => {
     handleChange(e);
@@ -259,16 +264,21 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
           >
             Hora de recolección
           </label>
-          <input
+
+          <select
             className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="horaRecoleccion"
-            type="time"
             name="horaRecoleccion"
+            value={form.horaRecoleccion}
             onBlur={handleBlur}
             onChange={handleChange}
-            value={form.horaRecoleccion}
             required
-          />
+          >
+            <option value="">Selecciona una opción</option>
+            <option value="7:30 a 12:00">7:30 a.m. a 12 m.d.</option>
+            <option value="12:00 a 5:30">12 m.d. a 5:30 p.m.</option>
+            <option value="7:30 a 5:30">7:30 a.m. a 5:30 p.m.</option>
+          </select>
         </div>
       </div>
       <div className="form-group mb-4">
@@ -309,44 +319,48 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
             required
           />
         </div>
-        <div className="flex flex-auto">
-          <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="desde"
-            >
-              Horario de entrega
-            </label>
-            <input
-              className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="desde"
-              type="time"
-              name="desde"
-              onBlur={handleBlur}
-              onChange={handleChange}
-              value={form.desde}
-              required
-            />
-          </div>
-          <div className="w-full md:w-1/2 px-2">
-            <label
-              className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="hasta"
-            >
-              Horario de entrega
-            </label>
-            <input
-              className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="hasta"
-              type="time"
-              name="hasta"
-              onBlur={handleBlur}
-              onChange={handleChange}
-              value={form.hasta}
-              required
-            />
-          </div>
+        <div className="w-full md:w-1/2 px-2">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="horaEntrega"
+          >
+            Hora de entrega
+          </label>
+
+          <select
+            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="horaEntrega"
+            name="horaEntrega"
+            value={form.horaEntrega}
+            onBlur={handleBlur}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Selecciona una opción</option>
+            <option value="7:30 a 12:00">7:30 a.m. a 12 m.d.</option>
+            <option value="12:00 a 5:30">12 m.d. a 5:30 p.m.</option>
+            <option value="7:30 a 5:30">7:30 a.m. a 5:30 p.m.</option>
+          </select>
         </div>
+      </div>
+      <div className="form-group mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="lugarEntrega"
+        >
+          Lugar de entrega
+        </label>
+        <input
+          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="lugarEntrega"
+          type="text"
+          name="lugarEntrega"
+          placeholder="Ingrese el lugar de entrega"
+          onBlur={handleBlur}
+          onChange={handleChange}
+          value={form.lugarEntrega}
+          required
+        />
       </div>
       <label className="block text-gray-700 text-md font-bold mb-4">
         Información de paquetes
@@ -389,49 +403,26 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
           required
         ></textarea>
       </div>
-      <div className="flex flex-wrap -mx-2 mb-4">
-        <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="fragil"
-          >
-            ¿Es producto frágil?
-          </label>
-          <select
-            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="fragil"
-            name="fragil"
-            value={form.fragil}
-            onBlur={handleBlur}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Selecciona una opción</option>
-            <option value="Si">Sí</option>
-            <option value="No">No</option>
-          </select>
-        </div>
-        <div className="w-full md:w-1/2 px-2">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="quimico"
-          >
-            ¿Es producto químico?
-          </label>
-          <select
-            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="quimico"
-            name="quimico"
-            value={form.quimico}
-            onBlur={handleBlur}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Selecciona una opción</option>
-            <option value="Si">Sí</option>
-            <option value="No">No</option>
-          </select>
-        </div>
+      <div className="form-group mb-4">
+        <label
+          className="block text-gray-700 text-sm font-bold mb-2"
+          htmlFor="fragil"
+        >
+          ¿Es producto frágil?
+        </label>
+        <select
+          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          id="fragil"
+          name="fragil"
+          value={form.fragil}
+          onBlur={handleBlur}
+          onChange={handleChange}
+          required
+        >
+          <option value="">Selecciona una opción</option>
+          <option value="Si">Sí</option>
+          <option value="No">No</option>
+        </select>
       </div>
       <div className="form-group mb-6">
         <label
@@ -451,6 +442,10 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
           value={form.message}
         ></textarea>
       </div>
+      <ReCAPTCHA
+              sitekey="6LcL8vgpAAAAAIme5VgGHfcIsaIG1m2yJh5liVE2"
+              onChange={handleRecaptchaChange}
+            />
       <div className="form-submit mt-5">
         <button
           type="submit"

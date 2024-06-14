@@ -31,60 +31,59 @@ const Boletin = () => {
       })
       .build();
 
-      connection.on("PublishCore", (boletin) => {
-        // Convierte la cadena JSON en un objeto
-        const item = JSON.parse(boletin);
-      
-        const isEmpresaIdValid = item && item.EmpresaId === 2;
-        const isDirigidoValid =
-          item &&
-            (item.Dirigido === "boletinRegistrado" ||
-            item.Dirigido === "boletinActualizado" ||
-            item.Dirigido === "boletinEliminado");
-      
-        if (isEmpresaIdValid && isDirigidoValid) {
-          setSignalRData((prevData) => {
-            if (!prevData || !prevData.data || !prevData.data.items) {
-              return { data: { items: [item] } };
-            }
-      
-            if (item.Dirigido === "boletinRegistrado") {
-              const updatedItems = [...prevData.data.items, item];
-              const updatedData = {
-                ...prevData,
-                data: {
-                  ...prevData.data,
-                  items: updatedItems,
-                },
-              };
-              return updatedData;
-            } else if (item.Dirigido === "boletinActualizado") {
-              const updatedItems = prevData.data.items.map((prevItem) =>
-                prevItem.id === item.Id ? item : prevItem
-              );
-              const updatedData = {
-                ...prevData,
-                data: {
-                  ...prevData.data,
-                  items: updatedItems,
-                },
-              };
-              return updatedData;
-            } else if (item.Dirigido === "boletinEliminado") {
-              const filteredItems = prevData.data.items.filter(
-                (prevItem) => prevItem.id !== item.Id
-              );
-              const updatedData = {
-                ...prevData,
-                data: {
-                  items: filteredItems,
-                },
-              };
-              return updatedData;
-            }
-          });
-        }
-      });
+    connection.on("PublishCore", (boletin) => {
+      const item = JSON.parse(boletin);
+
+      const isEmpresaIdValid = item && item.EmpresaId === 2;
+      const isDirigidoValid =
+        item &&
+        (item.Dirigido === "boletinRegistrado" ||
+          item.Dirigido === "boletinActualizado" ||
+          item.Dirigido === "boletinEliminado");
+
+      if (isEmpresaIdValid && isDirigidoValid) {
+        setSignalRData((prevData) => {
+          if (!prevData || !prevData.data || !prevData.data.items) {
+            return { data: { items: [item] } };
+          }
+
+          if (item.Dirigido === "boletinRegistrado") {
+            const updatedItems = [...prevData.data.items, item];
+            const updatedData = {
+              ...prevData,
+              data: {
+                ...prevData.data,
+                items: updatedItems,
+              },
+            };
+            return updatedData;
+          } else if (item.Dirigido === "boletinActualizado") {
+            const updatedItems = prevData.data.items.map((prevItem) =>
+              prevItem.id === item.Id ? item : prevItem
+            );
+            const updatedData = {
+              ...prevData,
+              data: {
+                ...prevData.data,
+                items: updatedItems,
+              },
+            };
+            return updatedData;
+          } else if (item.Dirigido === "boletinEliminado") {
+            const filteredItems = prevData.data.items.filter(
+              (prevItem) => prevItem.id !== item.Id
+            );
+            const updatedData = {
+              ...prevData,
+              data: {
+                items: filteredItems,
+              },
+            };
+            return updatedData;
+          }
+        });
+      }
+    });
 
     const startConnections = async () => {
       try {
@@ -101,6 +100,19 @@ const Boletin = () => {
       connection.stop();
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      signalRData &&
+      signalRData.data &&
+      signalRData.data.items &&
+      signalRData.data.items.some(
+        (item) => (item.estado === 1 && item.empresaId === 2) || (item.Estado === 1 && item.EmpresaId === 2)
+      )
+    ) {
+      openModal1();
+    }
+  }, [signalRData]);
 
   const handleOpenModal = () => {
     if (

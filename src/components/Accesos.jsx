@@ -23,7 +23,7 @@ const Accesos = ({ clases, modal, modal1 }) => {
 
   return (
     <div
-      className={`grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 mt-[-250px] lg:w-[850px] w-full ${clases}`}
+      className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-20 mt-[-250px] lg:w-[850px] w-full ${clases}`}
       style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}
     >
       <CustomButton
@@ -53,7 +53,7 @@ const Accesos = ({ clases, modal, modal1 }) => {
         img={"envio.png"}
         img2={"envio-blanco.png"}
       />
-      <CustomButton
+      {/* <CustomButton
         label={"Administrar cuenta"}
         className={
           "bg-white text-center text-neutral-700 text-xl font-bold w-full relative group transition-transform transform hover:text-white hover:scale-105 border-t border-neutral-300 hover:bg-amber-500 h-[174px] mt-4 lg:w-[210px]"
@@ -61,7 +61,7 @@ const Accesos = ({ clases, modal, modal1 }) => {
         onClick={() => handleAlert(extractValue(CUENTA))}
         img={"administrar.png"}
         img2={"administrar-blanco.png"}
-      />
+      /> */}
     </div>
   );
 };

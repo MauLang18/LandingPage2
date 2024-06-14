@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import "./style.css";
 import Bitrix24Form from "../components/Bitrix24Form";
 import { useForm } from "../hooks/useForm2";
 import { useModal } from "../hooks/useModal";
 import Modal from "../components/Modal";
 import useFetchIdAndUpdateSignalR from "../hooks/useFetchIdAndUpdateSignalR";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const initialForm = {
   name: "",
@@ -54,6 +55,7 @@ const ContactForm = () => {
   };
 
   const [isOpenModal, openModal, closeModal] = useModal(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
   const renderTermContent = (term) => {
     return { __html: term };
@@ -70,6 +72,19 @@ const ContactForm = () => {
       return data.Valor;
     } else {
       return "";
+    }
+  };
+
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (recaptchaToken) {
+      handleSubmit(e);
+    } else {
+      alert("Por favor, verifique el reCAPTCHA.");
     }
   };
 
@@ -117,7 +132,7 @@ const ContactForm = () => {
           </div>
         </div>
         <div className="wow animated fadeInRight" data-wow-delay=".2s">
-          <form className="shake" onSubmit={handleSubmit}>
+          <form className="shake" onSubmit={handleFormSubmit}>
             <div className="flex flex-wrap -mx-2 mb-4">
               <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
                 <label
@@ -219,6 +234,10 @@ const ContactForm = () => {
                 {getErrorForField("message")}
               </div>
             </div>
+            <ReCAPTCHA
+              sitekey="6LcL8vgpAAAAAIme5VgGHfcIsaIG1m2yJh5liVE2"
+              onChange={handleRecaptchaChange}
+            />
             <button
               type="submit"
               className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4"
