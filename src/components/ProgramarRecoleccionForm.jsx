@@ -61,8 +61,6 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
   const {
     form,
     errores,
-    loading,
-    response,
     handleChange,
     handleBlur,
     handleSubmit,
@@ -454,7 +452,7 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
           Enviar
         </button>
         <button
-          type="button" // Cambiamos el tipo de botón a "button"
+          type="button"
           className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded ml-2 focus:outline-none focus:shadow-outline"
           onClick={closeModal}
         >

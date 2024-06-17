@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "./style.css";
-import Bitrix24Form from "../components/Bitrix24Form";
 import { useForm } from "../hooks/useForm2";
 import { useModal } from "../hooks/useModal";
 import Modal from "../components/Modal";
@@ -41,8 +40,6 @@ const ContactForm = () => {
   const {
     form,
     errores,
-    loading,
-    response,
     handleChange,
     handleBlur,
     handleSubmit,

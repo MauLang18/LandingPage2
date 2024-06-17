@@ -37,7 +37,6 @@ const useFetchIdAndUpdateSignalR = (id) => {
       });
 
       connection.on("PublishCore", (updatedData) => {
-        // Muestra la propiedad 'Dirigido' del objeto
         const item = JSON.parse(updatedData);
   
         const isEmpresaIdValid = item.EmpresaId === 2;

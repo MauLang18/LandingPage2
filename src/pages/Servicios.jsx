@@ -27,7 +27,6 @@ const Servicios = () => {
       .build();
 
       connection.on("PublishCore", (servicioBeneficio) => {
-        // Convierte la cadena JSON en un objeto
         const item = JSON.parse(servicioBeneficio);
       
         const isEmpresaIdValid = item && item.EmpresaId === 2;

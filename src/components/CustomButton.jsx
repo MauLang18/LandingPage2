@@ -6,10 +6,6 @@ const CustomButton = ({ label, onClick, className, img, img2 }) => {
 
   const [hovered, setHovered] = useState(false);
 
-  const toggleImage = () => {
-    setShowImg(!showImg);
-  };
-
   const handleMouseEnter = () => {
     setHovered(true);
   };

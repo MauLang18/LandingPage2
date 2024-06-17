@@ -36,7 +36,6 @@ const Inicio = () => {
       .build();
 
       connection.on("PublishCore", (banner) => {
-        // Convierte la cadena JSON en un objeto
         const item = JSON.parse(banner);
       
         const isEmpresaIdValid = item.EmpresaId === 2;

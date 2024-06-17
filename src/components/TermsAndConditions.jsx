@@ -23,7 +23,7 @@ const TermsAndConditions = ({ textColor, textSize, terms, title, isModal }) => {
   };
 
   const renderTermContent = (term) => {
-    return { __html: term.text }; // Esta línea permite renderizar HTML de manera segura.
+    return { __html: term.text };
   };
 
   return (

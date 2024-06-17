@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import emailjs from 'emailjs-com';
 
 export const useForm = (initialForm, validateForm, closeModal) => {
@@ -45,17 +45,6 @@ export const useForm = (initialForm, validateForm, closeModal) => {
           }
           setResponse(true);
         });
-      // helpHttp()
-      //   .post("https://apiadmin.tranquiexpress.com/api/Auth/Login", {
-      //     body: form,
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Accept: "application/json",
-      //     },
-      //   })
-      //   .then((res) => {
-      //     console.log(res.data);
-      //   });
     } else {
       return;
     }
