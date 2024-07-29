@@ -6,6 +6,7 @@ export const useForm = (initialForm, validateForm, closeModal) => {
   const [errores, setErrores] = useState({});
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);
+  const [recaptchaToken, setRecaptchaTokens] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,57 +18,51 @@ export const useForm = (initialForm, validateForm, closeModal) => {
 
   const handleBlur = (e) => {
     handleChange(e);
-    setErrores(validateForm(form));
+    //setErrores(validateForm(form));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setErrores(validateForm(form));
 
-    if (Object.keys(errores).length === 0) {
-      setLoading(true);
-      emailjs
+    if (!recaptchaToken) {
+      alert("Por favor completa el ReCAPTCHA para poder enviar el formulario.");
+      return;
+    }
+
+    setLoading(true);
+    emailjs
       .sendForm(
         "service_3bgd05m",
         "template_0tsra3b",
         e.target,
         "jYCGvRGBv-9WkRRx4"
       )
-        .then((res) => {
-          setLoading(false);
-          const confirmacion = window.confirm(
-            "¿Deseas programar otra recolección?"
-          );
-          if (confirmacion) {
-            setForm(initialForm);
-          } else {
-            closeModal();
-          }
-          setResponse(true);
-        });
-      // helpHttp()
-      //   .post("https://apiadmin.tranquiexpress.com/api/Auth/Login", {
-      //     body: form,
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Accept: "application/json",
-      //     },
-      //   })
-      //   .then((res) => {
-      //     console.log(res.data);
-      //   });
-    } else {
-      return;
-    }
+      .then((res) => {
+        setLoading(false);
+        const confirmacion = window.confirm("¿Deseas programar otra recolección?");
+        if (confirmacion) {
+          setForm(initialForm);
+        } else {
+          setForm(initialForm);
+          closeModal();
+        }
+        setResponse(true);
+      })
+      .catch((error) => {
+        console.error("Error al enviar el formulario:", error);
+        setLoading(false);
+      });
   };
 
   return {
     form,
+    setForm,
     errores,
     loading,
     response,
     handleChange,
     handleBlur,
     handleSubmit,
+    setRecaptchaTokens,
   };
 };

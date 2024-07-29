@@ -46,6 +46,7 @@ const ContactForm = () => {
     handleChange,
     handleBlur,
     handleSubmit,
+    setRecaptchaTokens
   } = useForm(initialForm, validateForm);
 
   const getErrorForField = (fieldName) => {

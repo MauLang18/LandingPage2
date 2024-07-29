@@ -1,80 +1,229 @@
-import { useState } from 'react';
-import { useForm } from "../hooks/useForm";
+import React, { useState, useEffect } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
+import axios from "axios";
+import { useForm } from "../hooks/useForm";
+import UserInformationForm from "./forms/UserInformationForm";
+import CollectionInformationForm from "./forms/CollectionInformationForm";
+import DeliveryInformationForm from "./forms/DeliveryInformationForm";
+import PackageInformationForm from "./forms/PackageInformationForm";
 
 const initialForm = {
-  name: "",
-  lastname: "",
-  phone: "",
-  email: "",
-  fechaRecoleccion: "",
-  horaRecoleccion: "",
-  lugarRecoleccion: "",
-  fechaEntrega: "",
-  horaEntrega: "",
-  lugarEntrega: "",
-  paquetes: "",
-  desc: "",
-  fragil: "",
-  message: "",
   cuenta: "",
-  nombreEmpresa: "",
-  cedula: "",
-};
-
-const validateForm = (form) => {
-  let errores = {};
-
-  if (!form.name.trim()) {
-    errores.name = "El campo 'Nombre' es requerido";
-  }
-  if (!form.lastname.trim()) {
-    errores.lastname = "El campo 'Apellido' es requerido";
-  }
-  if (!form.phone.trim()) {
-    errores.phone = "El campo 'Teléfono' es requerido";
-  }
-  if (!form.email.trim()) {
-    errores.email = "El campo 'Correo' es requerido";
-  }
-  if (!form.fechaRecoleccion.trim()) {
-    errores.fechaRecoleccion = "El campo 'Fecha de recolección' es requerido";
-  }
-  if (!form.horaRecoleccion.trim()) {
-    errores.horaRecoleccion = "El campo 'Hora de recolección' es requerido";
-  }
-  if (form.cuenta === "Si") {
-    if (!form.nombreEmpresa.trim()) {
-      errores.usuario = "El campo 'Nombre de Empresa' es requerido";
-    }
-    if (!form.cedula.trim()) {
-      errores.contrasena = "El campo 'Cedula' es requerido";
-    }
-  }
-
-  return errores;
+  nombreUsuario: "",
+  contra: "",
+  nombre: "",
+  apellido: "",
+  empresa: "",
+  telefono: "",
+  celular: "",
+  correo: "",
+  correoFactura: "",
+  fechaRecoleccion: "",
+  horarioRecoleccion: "",
+  provinciaRecoleccion: "",
+  cantonRecoleccion: "",
+  distritoRecoleccion: "",
+  barrioRecoleccion: "",
+  direccionRecoleccion: "",
+  enlaceRecoleccion: "",
+  nombreRecoleccion: "",
+  apellidoRecoleccion: "",
+  numeroRecoleccion: "",
+  fechaEntrega: "",
+  horarioEntrega: "",
+  provinciaEntrega: "",
+  cantonEntrega: "",
+  distritoEntrega: "",
+  barrioEntrega: "",
+  direccionEntrega: "",
+  enlaceEntrega: "",
+  nombreEntrega: "",
+  apellidoEntrega: "",
+  numeroEntrega: "",
+  paquetes: [
+    {
+      cantidad: "",
+      peso: "",
+      largo: "",
+      ancho: "",
+      alto: "",
+      tipoPaquete: "",
+      fragil: false,
+    },
+  ],
+  dataRecoleccion: {
+    provinciasRecoleccion: [],
+    cantonesPorProvincia: {},
+    distritosPorCanton: {},
+  },
+  dataEntrega: {
+    provinciasEntrega: [],
+    cantonesPorProvincia: {},
+    distritosPorCanton: {},
+  },
+  observaciones: ""
 };
 
 const ProgramarRecoleccionForm = ({ closeModal }) => {
-  const [recaptchaToken, setRecaptchaToken] = useState(null);
-  const [cuenta, setCuenta] = useState("");
-  const {
-    form,
-    errores,
-    loading,
-    response,
-    handleChange,
-    handleBlur,
-    handleSubmit,
-  } = useForm(initialForm, validateForm, () => closeModal());
+  const { form, setForm, handleSubmit, handleChange, handleBlur, setRecaptchaTokens } = useForm(
+    initialForm,
+    closeModal
+  );
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+  const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
+  const [openModalCount, setOpenModalCount] = useState(0);
 
-  const handleRecaptchaChange = (token) => {
-    setRecaptchaToken(token);
+  useEffect(() => {
+    const jsonFilePath = "src/assets/provincias-cantones-distritos.json";
+
+    fetch(jsonFilePath)
+      .then((response) => response.json())
+      .then((jsonData) => {
+        setForm((prevForm) => ({
+          ...prevForm,
+          dataRecoleccion: {
+            provinciasRecoleccion: jsonData.provincias,
+            cantonesPorProvincia: jsonData.cantonesPorProvincia,
+            distritosPorCanton: jsonData.distritosPorCanton,
+          },
+          dataEntrega: {
+            provinciasEntrega: jsonData.provincias,
+            cantonesPorProvincia: jsonData.cantonesPorProvincia,
+            distritosPorCanton: jsonData.distritosPorCanton,
+          },
+        }));
+      })
+      .catch((error) => {
+        console.error("Error al cargar el archivo JSON:", error);
+      });
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [setForm]);
+
+  const handleClickOutside = (event) => {
+    if (event.target.closest(".bg-opacity-75") === null) {
+      setShowCreateAccountModal(false);
+    }
   };
 
-  const handleCuentaChange = (e) => {
-    handleChange(e);
-    setCuenta(e.target.value);
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaTokens(token);
+  };
+
+  const handleInicioSesion = () => {
+    axios
+      .post("url_de_tu_api_para_iniciar_sesion", {
+        usuario: form.nombreUsuario,
+        contraseña: form.contra,
+      })
+      .then((response) => {
+        const userData = response.data;
+        setForm((prevForm) => ({
+          ...prevForm,
+          nombre: userData.nombre,
+          apellido: userData.apellido,
+          empresa: userData.empresa,
+          telefono: userData.telefono,
+          celular: userData.celular,
+          correo: userData.correo,
+          correoFactura: userData.correoFactura,
+        }));
+      })
+      .catch((error) => {
+        console.error("Error al iniciar sesión:", error);
+      });
+  };
+
+  const agregarCampos = () => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      paquetes: [
+        ...prevForm.paquetes,
+        {
+          cantidad: "",
+          peso: "",
+          largo: "",
+          ancho: "",
+          alto: "",
+          tipoPaquete: "",
+          fragil: false,
+        },
+      ],
+    }));
+  };
+
+  const handleChangePaquete = (e, index, field) => {
+    const { value } = e.target;
+    setForm((prevForm) => {
+      const paquetes = [...prevForm.paquetes];
+      paquetes[index][field] = value;
+      return { ...prevForm, paquetes };
+    });
+  };
+
+  const handleFragileChange = (e, index) => {
+    const { checked } = e.target;
+    setForm((prevForm) => {
+      const paquetes = [...prevForm.paquetes];
+      paquetes[index].fragil = checked;
+      return { ...prevForm, paquetes };
+    });
+  };
+
+  const handleProvinciaRecoleccionChange = (selectedProvincia) => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      provinciaRecoleccion: selectedProvincia,
+      cantonRecoleccion: "",
+      distritoRecoleccion: "",
+    }));
+  };
+
+  const handleCantonRecoleccionChange = (selectedCanton) => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      cantonRecoleccion: selectedCanton,
+      distritoRecoleccion: "",
+    }));
+  };
+
+  const handleProvinciaEntregaChange = (selectedProvincia) => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      provinciaEntrega: selectedProvincia,
+      cantonEntrega: "",
+      distritoEntrega: "",
+    }));
+  };
+
+  const handleCantonEntregaChange = (selectedCanton) => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      cantonEntrega: selectedCanton,
+      distritoEntrega: "",
+    }));
+  };
+
+  const handleChangeCuenta = (e) => {
+    const { value } = e.target;
+    setForm((prevForm) => ({
+      ...prevForm,
+      cuenta: value,
+    }));
+    setShowCreateAccountModal(value === "No");
+  };
+
+  const handleCreateAccount = () => {
+    window.open("https://sistema.tranquiexpress.com/RegistroCliente", "_blank");
+    setShowCreateAccountModal(false);
+  };
+
+  const handleContinueAsGuest = () => {
+    setShowCreateAccountModal(false);
   };
 
   return (
@@ -99,7 +248,7 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
           name="cuenta"
           value={form.cuenta}
           onBlur={handleBlur}
-          onChange={handleCuentaChange}
+          onChange={handleChangeCuenta}
           required
         >
           <option value="">Selecciona una opción</option>
@@ -107,345 +256,121 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
           <option value="No">No</option>
         </select>
       </div>
-      {cuenta === "Si" && (
+      {form.cuenta === "Si" && (
         <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="nombreEmpresa"
+            htmlFor="nombreUsuario"
           >
-            Nombre Empresa
+            Nombre de usuario
           </label>
           <input
             className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="nombreEmpresa"
+            id="nombreUsuario"
             type="text"
-            name="nombreEmpresa"
-            placeholder="Ingrese su nombre de empresa"
+            name="nombreUsuario"
+            placeholder="Ingrese su nombre de usuario"
             onBlur={handleBlur}
             onChange={handleChange}
-            value={form.nombreEmpresa}
+            value={form.nombreUsuario}
             required
           />
-          {errores.nombreEmpresa && (
-            <p className="font-bold text-red-500">{errores.nombreEmpresa}</p>
-          )}
           <label
             className="block text-gray-700 text-sm font-bold mb-2 mt-4"
-            htmlFor="cedula"
+            htmlFor="contra"
           >
-            Cedula
+            Contraseña
           </label>
           <input
             className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="cedula"
-            type="text"
-            name="cedula"
-            placeholder="Ingrese su cedula"
+            id="contra"
+            type="password"
+            name="contra"
+            placeholder="Ingrese su contraseña"
             onBlur={handleBlur}
             onChange={handleChange}
-            value={form.cedula}
+            value={form.contra}
             required
           />
-          {errores.cedula && (
-            <p className="font-bold text-red-500">{errores.cedula}</p>
-          )}
+          <div className="flex mt-4">
+            <button
+              type="button"
+              className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              onClick={handleInicioSesion}
+            >
+              Iniciar Sesión
+            </button>
+          </div>
         </div>
       )}
-      <label className="block text-gray-700 text-md font-bold mb-4 mt-10">
-        Información de usuario
-      </label>
-      <div className="flex flex-wrap -mx-2 mb-4">
-        <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="name"
-          >
-            Nombre
-          </label>
-          <input
-            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="name"
-            type="text"
-            name="name"
-            placeholder="Ingrese su nombre"
-            onBlur={handleBlur}
-            onChange={handleChange}
-            value={form.name}
-            required
-          />
-          {errores.name && (
-            <p className="font-bold text-red-500">{errores.name}</p>
-          )}
-        </div>
-        <div className="w-full md:w-1/2 px-2">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="lastname"
-          >
-            Apellido
-          </label>
-          <input
-            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="lastname"
-            type="text"
-            name="lastname"
-            placeholder="Ingrese su apellido"
-            onBlur={handleBlur}
-            onChange={handleChange}
-            value={form.lastname}
-            required
-          />
-        </div>
-      </div>
-      <div className="form-group mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="phone"
-        >
-          Teléfono
-        </label>
-        <input
-          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="phone"
-          type="tel"
-          name="phone"
-          placeholder="Ingrese su teléfono"
-          onBlur={handleBlur}
-          onChange={handleChange}
-          value={form.phone}
-          required
-        />
-      </div>
-      <div className="form-group mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="email"
-        >
-          Correo
-        </label>
-        <input
-          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="email"
-          type="email"
-          name="email"
-          placeholder="Ingrese su correo"
-          onBlur={handleBlur}
-          onChange={handleChange}
-          value={form.email}
-          required
-        />
-      </div>
-      <label className="block text-gray-700 text-md font-bold mb-4">
-        Información de recolección
-      </label>
-      <div className="flex flex-wrap -mx-2 mb-4">
-        <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="fechaRecoleccion"
-          >
-            Fecha de recolección
-          </label>
-          <input
-            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="fechaRecoleccion"
-            type="date"
-            name="fechaRecoleccion"
-            onBlur={handleBlur}
-            onChange={handleChange}
-            value={form.fechaRecoleccion}
-            required
-          />
-        </div>
-        <div className="w-full md:w-1/2 px-2">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="horaRecoleccion"
-          >
-            Hora de recolección
-          </label>
 
-          <select
-            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="horaRecoleccion"
-            name="horaRecoleccion"
-            value={form.horaRecoleccion}
-            onBlur={handleBlur}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Selecciona una opción</option>
-            <option value="7:30 a 12:00">7:30 a.m. a 12 m.d.</option>
-            <option value="12:00 a 5:30">12 m.d. a 5:30 p.m.</option>
-            <option value="7:30 a 5:30">7:30 a.m. a 5:30 p.m.</option>
-          </select>
-        </div>
-      </div>
-      <div className="form-group mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="lugarRecoleccion"
-        >
-          Lugar de recolección
-        </label>
-        <input
-          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="lugarRecoleccion"
-          type="text"
-          name="lugarRecoleccion"
-          placeholder="Ingrese el lugar de recolección"
-          onBlur={handleBlur}
-          onChange={handleChange}
-          value={form.lugarRecoleccion}
-          required
-        />
-      </div>
-      <div className="flex flex-wrap -mx-2 mb-4">
-        <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+      <UserInformationForm
+        form={form}
+        handleChange={handleChange}
+        handleBlur={handleBlur}
+      />
+      <CollectionInformationForm
+        form={form}
+        handleChange={handleChange}
+        handleBlur={handleBlur}
+        handleProvinciaRecoleccionChange={handleProvinciaRecoleccionChange}
+        handleCantonRecoleccionChange={handleCantonRecoleccionChange}
+        provinciasRecoleccion={form.dataRecoleccion.provinciasRecoleccion}
+        cantonesRecoleccion={
+          form.dataRecoleccion.cantonesPorProvincia[
+            form.provinciaRecoleccion
+          ] || []
+        }
+        distritosRecoleccion={
+          form.dataRecoleccion.distritosPorCanton[form.cantonRecoleccion] || []
+        }
+        userInfo={form}
+      />
+      <DeliveryInformationForm
+        form={form}
+        handleChange={handleChange}
+        handleBlur={handleBlur}
+        handleProvinciaEntregaChange={handleProvinciaEntregaChange}
+        handleCantonEntregaChange={handleCantonEntregaChange}
+        provinciasEntrega={form.dataEntrega.provinciasEntrega}
+        cantonesEntrega={
+          form.dataEntrega.cantonesPorProvincia[form.provinciaEntrega] || []
+        }
+        distritosEntrega={
+          form.dataEntrega.distritosPorCanton[form.cantonEntrega] || []
+        }
+        userInfo={form}
+      />
+      <PackageInformationForm
+        paquetes={form.paquetes}
+        handleChangePaquete={handleChangePaquete}
+        handleFragileChange={handleFragileChange}
+        agregarCampos={agregarCampos}
+      />
+    	<div className="w-full md:w-1/1 px-2 mb-4 md:mb-0">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="fechaEntrega"
+            htmlFor="observaciones"
           >
-            Fecha de entrega
+            Observaciones
           </label>
-          <input
+          <textarea
             className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="fechaEntrega"
-            type="date"
-            name="fechaEntrega"
+            id="observaciones"
+            rows={4}
+            name="observaciones"
+            placeholder="Escriba observaciones adicionales si lo considera necesario"
             onBlur={handleBlur}
             onChange={handleChange}
-            value={form.fechaEntrega}
-            required
+            value={form.observaciones}
           />
         </div>
-        <div className="w-full md:w-1/2 px-2">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="horaEntrega"
-          >
-            Hora de entrega
-          </label>
-
-          <select
-            className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="horaEntrega"
-            name="horaEntrega"
-            value={form.horaEntrega}
-            onBlur={handleBlur}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Selecciona una opción</option>
-            <option value="7:30 a 12:00">7:30 a.m. a 12 m.d.</option>
-            <option value="12:00 a 5:30">12 m.d. a 5:30 p.m.</option>
-            <option value="7:30 a 5:30">7:30 a.m. a 5:30 p.m.</option>
-          </select>
-        </div>
-      </div>
-      <div className="form-group mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="lugarEntrega"
-        >
-          Lugar de entrega
-        </label>
-        <input
-          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="lugarEntrega"
-          type="text"
-          name="lugarEntrega"
-          placeholder="Ingrese el lugar de entrega"
-          onBlur={handleBlur}
-          onChange={handleChange}
-          value={form.lugarEntrega}
-          required
+      <div className="flex mt-8">
+        <ReCAPTCHA
+          sitekey="6LcL8vgpAAAAAIme5VgGHfcIsaIG1m2yJh5liVE2"
+          onChange={handleRecaptchaChange}
         />
       </div>
-      <label className="block text-gray-700 text-md font-bold mb-4">
-        Información de paquetes
-      </label>
-      <div className="form-group mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="paquetes"
-        >
-          Cantidad de paquetes
-        </label>
-        <input
-          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="paquetes"
-          type="number"
-          name="paquetes"
-          placeholder="Ingrese la cantidad de paquetes"
-          onBlur={handleBlur}
-          onChange={handleChange}
-          value={form.paquetes}
-          required
-        />
-      </div>
-      <div className="form-group mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="desc"
-        >
-          Descripción de productos
-        </label>
-        <textarea
-          className="border py-2 px-3 form-textarea mt-1 block w-full rounded-md transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-          id="desc"
-          name="desc"
-          rows="3"
-          placeholder="Escriba la descripción de los productos"
-          onBlur={handleBlur}
-          onChange={handleChange}
-          value={form.desc}
-          required
-        ></textarea>
-      </div>
-      <div className="form-group mb-4">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="fragil"
-        >
-          ¿Es producto frágil?
-        </label>
-        <select
-          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          id="fragil"
-          name="fragil"
-          value={form.fragil}
-          onBlur={handleBlur}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Selecciona una opción</option>
-          <option value="Si">Sí</option>
-          <option value="No">No</option>
-        </select>
-      </div>
-      <div className="form-group mb-6">
-        <label
-          className="block text-gray-700 text-sm font-bold mb-2"
-          htmlFor="message"
-        >
-          Observaciones
-        </label>
-        <textarea
-          className="border py-2 px-3 form-textarea mt-1 block w-full rounded-md transition duration-150 ease-in-out sm:text-sm sm:leading-5"
-          id="message"
-          name="message"
-          rows="3"
-          placeholder="Escriba las observaciones"
-          onBlur={handleBlur}
-          onChange={handleChange}
-          value={form.message}
-        ></textarea>
-      </div>
-      <ReCAPTCHA
-              sitekey="6LcL8vgpAAAAAIme5VgGHfcIsaIG1m2yJh5liVE2"
-              onChange={handleRecaptchaChange}
-            />
       <div className="form-submit mt-5">
         <button
           type="submit"
@@ -454,13 +379,42 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
           Enviar
         </button>
         <button
-          type="button" // Cambiamos el tipo de botón a "button"
+          type="button"
           className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded ml-2 focus:outline-none focus:shadow-outline"
           onClick={closeModal}
         >
           Cancelar
         </button>
       </div>
+
+      {showCreateAccountModal && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-800 bg-opacity-75 z-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md relative">
+            <div className="absolute top-0 left-0 w-full h-3 bg-orange-500"></div>
+            <h2 className="text-2xl font-bold mb-4">Crear cuenta</h2>
+            <p className="text-gray-700 mb-4">
+              Creá tu cuenta y accedé a todos los beneficios.
+            </p>
+            <div className="items-center justify-center">
+              <button
+                type="button"
+                className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 my-2 rounded focus:outline-none focus:shadow-outline"
+                onClick={handleCreateAccount}
+              >
+                ¡Quiero registrarme!
+              </button>
+              <button
+                type="button"
+                className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 my-2 rounded focus:outline-none focus:shadow-outline"
+                onClick={handleContinueAsGuest}
+              >
+                Continuar como invitado
+              </button>
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-3 bg-orange-500"></div>
+          </div>
+        </div>
+      )}
     </form>
   );
 };

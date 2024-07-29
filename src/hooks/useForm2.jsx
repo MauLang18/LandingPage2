@@ -6,6 +6,7 @@ export const useForm = (initialForm, validateForm) => {
   const [errores, setErrores] = useState({});
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);
+  const [recaptchaToken, setRecaptchaTokens] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,5 +52,6 @@ export const useForm = (initialForm, validateForm) => {
     handleChange,
     handleBlur,
     handleSubmit,
+    setRecaptchaTokens
   };
 };
