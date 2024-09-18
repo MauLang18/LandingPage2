@@ -23,7 +23,7 @@ const Accesos = ({ clases, modal, modal1 }) => {
 
   return (
     <div
-      className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-20 mt-[-250px] lg:w-[850px] w-full ${clases}`}
+      className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-10 mt-[-250px] lg:w-[700px] w-full ${clases}`}
       style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}
     >
       <CustomButton
