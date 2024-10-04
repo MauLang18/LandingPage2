@@ -3,11 +3,14 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      colors: {
+      colors: { 
         primary: "#01A2E4",
         secondary: "#EAEAFC",
         footer: "#2E3E5C",
       },
+      gap:{
+        '10': '2.125rem'
+      }
     },
   },
   plugins: [],

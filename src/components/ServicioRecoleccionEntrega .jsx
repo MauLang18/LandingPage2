@@ -27,7 +27,7 @@ const ServicioRecoleccionEntrega = ({ onVolverClick }) => {
   const [mostrarTarifa, setMostrarTarifa] = useState(false);
 
   useEffect(() => {
-    const jsonFilePath = "src/assets/provincias-cantones-distritos.json";
+    const jsonFilePath = "/provincias-cantones-distritos.json";
 
     fetch(jsonFilePath)
       .then((response) => response.json())

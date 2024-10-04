@@ -74,7 +74,7 @@ const ProgramarRecoleccionForm = ({ closeModal }) => {
   const [openModalCount, setOpenModalCount] = useState(0);
 
   useEffect(() => {
-    const jsonFilePath = "src/assets/provincias-cantones-distritos.json";
+    const jsonFilePath = "/provincias-cantones-distritos.json";
 
     fetch(jsonFilePath)
       .then((response) => response.json())
