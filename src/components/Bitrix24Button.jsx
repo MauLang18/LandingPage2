@@ -17,20 +17,28 @@ const Bitrix24Button = () => {
   };
 
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `${extractValue(CHAT)}?` + (Date.now() / 60000 | 0);
-    script.async = true;
+    const url = extractValue(CHAT);
+    console.log("URL generada:", url);
 
-    script.onload = () => {
-      setButtonLoaded(true);
-    };
+    // Validación: Solo crea el script si la URL es válida
+    if (url) {
+      const script = document.createElement("script");
+      script.src = `${url}?` + (Date.now() / 60000 | 0);
+      script.async = true;
 
-    document.head.appendChild(script);
+      script.onload = () => {
+        setButtonLoaded(true);
+      };
 
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
+      document.head.appendChild(script);
+
+      return () => {
+        document.head.removeChild(script);
+      };
+    } else {
+      console.error("No se pudo cargar el script. URL inválida.");
+    }
+  }, [CHAT]);
 
   if (!buttonLoaded) {
     return <div>Cargando botón...</div>;
